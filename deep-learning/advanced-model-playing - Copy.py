@@ -27,12 +27,15 @@ class MyStupidNetwork:
         self.a = learning_rate
 
         # Define weight matrix (output dim, input dim) by convention
-        # Use zero-mean Xavier init (good for sigmoid, it has little
-        # effect here as we don't use activation functions,
-        # but useful for comparison.)
+        # Use zero-mean Xavier init (good for sigmoid)
+        # This makes a huge differences vs uniform.
         self.W1 = np.random.randn(784, 512) * np.sqrt(1 / 784)
         self.W2 = np.random.randn(512, 512) * np.sqrt(1 / 512)
         self.W3 = np.random.randn(512, 10) * np.sqrt(1 / 512)
+
+        self.b1 = np.zeros((1, 512))
+        self.b2 = np.zeros((1, 512))
+        self.b3 = np.zeros((1, 10))
 
     def loss(self, l3, y):
         p = self.softmax(l3)[0][y]
@@ -44,17 +47,31 @@ class MyStupidNetwork:
 
     def predict(self, x):
         x = x.reshape(1, x.size)
-        l3 = x @ self.W1 @ self.W2 @ self.W3
+        l1_hat = x @ self.W1 + self.b1
+        l1 = self.phi(l1_hat)
+        l2_hat = l1 @ self.W2 + self.b2
+        l2 = self.phi(l2_hat)
+        l3 = l2 @ self.W3 + self.b3
         return np.argmax(self.softmax(l3))
+
+    def phi(self, vec):
+        return 1 / (1 + np.exp(-vec))
+
+    def dphi_dvec(self, vec):
+        return np.exp(-vec) / (1 + np.exp(-vec))**2
 
     def update_weights(self, x, y, verbose=False):
 
         x = x.reshape(1, x.size)
 
         # Forward pass
-        l1 = x @ self.W1
-        l2 = l1 @ self.W2
-        l3 = l2 @ self.W3
+        l1_hat = x @ self.W1 + self.b1
+        l1 = self.phi(l1_hat)
+
+        l2_hat = l1 @ self.W2 + self.b2
+        l2 = self.phi(l2_hat)
+
+        l3 = l2 @ self.W3 + self.b3
 
         loss = self.loss(l3, y)
 
@@ -65,17 +82,24 @@ class MyStupidNetwork:
         dloss_dl3 = self.softmax(l3)  # double check this
         dloss_dl3[0][y] -= 1
 
-        dloss_dW3 = l2.T @ dloss_dl3       # (512, 10) = (512, 1) x (1, 10)
+        dloss_dW3 = l2.T @ dloss_dl3
+        dloss_db3 = dloss_dl3
 
-        dloss_dl2 = dloss_dl3 @ self.W3.T  # (1, 512) = (1, 10) x (10, 512)
-        dloss_dW2 = l1.T @ dloss_dl2       # (512, 512) = (512, 1) x (1, 512)
+        dloss_dl2 = dloss_dl3 @ self.W3.T                               # (1, 512) = (1, 10) x (10, 512)
+        dloss_dW2 = l1.T @ (self.dphi_dvec(l2_hat) * dloss_dl2)         # (512, 512) = (512, 1) x (1, 512) * (1, 512)
+        dloss_db2 = self.dphi_dvec(l2_hat) * dloss_dl2                  # (1, 512) = (512, 1) x (1, 512)
 
-        dloss_dl1 = dloss_dl2 @ self.W2.T  # (1, 512) = (1, 512) x (512, 512)
-        dloss_dW1 = x.T @ dloss_dl1        # (784, 512) = (781, 1) x (1, 512)
+        dloss_dl1 = (dloss_dl2 * self.dphi_dvec(l2_hat)) @ self.W2.T    # (1, 512) * (1, 512) x (512, 512)
+        dloss_dW1 = x.T @ (self.dphi_dvec(l1_hat) * dloss_dl1)          # (784, 1) * (1, 512) x (1, 512)
+        dloss_db1 = self.dphi_dvec(l1_hat) * dloss_dl1                  # (1, 512) * (1, 512)
 
         self.W3 -= self.a * dloss_dW3
         self.W2 -= self.a * dloss_dW2
         self.W1 -= self.a * dloss_dW1
+
+        self.b3 -= self.a * dloss_db3
+        self.b2 -= self.a * dloss_db2
+        self.b1 -= self.a * dloss_db1
 
 # Initialise and train the model (no batching)
 model = MyStupidNetwork()
@@ -86,7 +110,7 @@ for i, (X, y) in enumerate(training_data):
     x = np.asarray(X[0, :, :])
     y = int(y)
 
-    model.update_weights(x, y)
+    model.update_weights(x, y, verbose=False)
 
     if i % 1000 == 0:
         print(f"Training iteration: Epoch: {j}, round: {i}")
@@ -101,11 +125,7 @@ for i, (X, y) in enumerate(test_data):
     results[i] = model.predict(x) == y
 
 print(f"Percent Correct: {np.mean(results) * 100}%")
-# 73%
-# 73%
+# 82.45%
+# 82.26
 # with 3 epochs:
-# 74%
-breakpoint()
-W1 = model.W1
-W2 = model.W2
-W3 = model.W3
+# 84.89
