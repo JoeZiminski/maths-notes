@@ -21,7 +21,7 @@ test_data = datasets.FashionMNIST(
     transform=ToTensor()
 )
 
-class MyStupidNetwork:
+class MyBetterNetwork:
     def __init__(self, learning_rate=0.02):
 
         self.a = learning_rate
@@ -46,13 +46,20 @@ class MyStupidNetwork:
         return np.exp(vec - C) / np.sum(np.exp(vec - C))
 
     def predict(self, x):
+        # forward pass through the network
         x = x.reshape(1, x.size)
+
         l1_hat = x @ self.W1 + self.b1
         l1 = self.phi(l1_hat)
+
         l2_hat = l1 @ self.W2 + self.b2
         l2 = self.phi(l2_hat)
+
         l3 = l2 @ self.W3 + self.b3
-        return np.argmax(self.softmax(l3))
+
+        pred = np.argmax(self.softmax(l3))
+
+        return pred, l1_hat, l1, l2_hat, l2, l3
 
     def phi(self, vec):
         return 1 / (1 + np.exp(-vec))
@@ -64,14 +71,7 @@ class MyStupidNetwork:
 
         x = x.reshape(1, x.size)
 
-        # Forward pass
-        l1_hat = x @ self.W1 + self.b1
-        l1 = self.phi(l1_hat)
-
-        l2_hat = l1 @ self.W2 + self.b2
-        l2 = self.phi(l2_hat)
-
-        l3 = l2 @ self.W3 + self.b3
+        _, l1_hat, l1, l2_hat, l2, l3 = self.predict(x)
 
         loss = self.loss(l3, y)
 
@@ -89,9 +89,9 @@ class MyStupidNetwork:
         dloss_dW2 = l1.T @ (self.dphi_dvec(l2_hat) * dloss_dl2)         # (512, 512) = (512, 1) x (1, 512) * (1, 512)
         dloss_db2 = self.dphi_dvec(l2_hat) * dloss_dl2                  # (1, 512) = (512, 1) x (1, 512)
 
-        dloss_dl1 = (dloss_dl2 * self.dphi_dvec(l2_hat)) @ self.W2.T    # (1, 512) * (1, 512) x (512, 512)
-        dloss_dW1 = x.T @ (self.dphi_dvec(l1_hat) * dloss_dl1)          # (784, 1) * (1, 512) x (1, 512)
-        dloss_db1 = self.dphi_dvec(l1_hat) * dloss_dl1                  # (1, 512) * (1, 512)
+        dloss_dl1 = (dloss_dl2 * self.dphi_dvec(l2_hat)) @ self.W2.T    # (1, 512) = (1, 512) * (1, 512) x (512, 512)
+        dloss_dW1 = x.T @ (self.dphi_dvec(l1_hat) * dloss_dl1)          # (784, 512) = (784, 1) x (1, 512) * (1, 512)
+        dloss_db1 = self.dphi_dvec(l1_hat) * dloss_dl1                  # (1, 512) = (1, 512) * (1, 512)
 
         self.W3 -= self.a * dloss_dW3
         self.W2 -= self.a * dloss_dW2
@@ -102,9 +102,8 @@ class MyStupidNetwork:
         self.b1 -= self.a * dloss_db1
 
 # Initialise and train the model (no batching)
-model = MyStupidNetwork()
+model = MyBetterNetwork()
 
-j = 0
 for i, (X, y) in enumerate(training_data):
 
     x = np.asarray(X[0, :, :])
@@ -113,7 +112,7 @@ for i, (X, y) in enumerate(training_data):
     model.update_weights(x, y, verbose=False)
 
     if i % 1000 == 0:
-        print(f"Training iteration: Epoch: {j}, round: {i}")
+        print(f"Training iteration: sample: {i}")
 
 # Check the model accuracy
 results = np.empty(len(test_data))
@@ -122,7 +121,7 @@ for i, (X, y) in enumerate(test_data):
 
     x = np.asarray(X[0, :, :])
 
-    results[i] = model.predict(x) == y
+    results[i] = model.predict(x)[0] == y
 
 print(f"Percent Correct: {np.mean(results) * 100}%")
 # 82.45%

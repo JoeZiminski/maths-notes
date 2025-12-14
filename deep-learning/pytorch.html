@@ -574,7 +574,7 @@ L(\mathbf{l^3}, y) = -\log \dfrac{ \exp{ l^3_y }}{ \sum_k \exp{ l^3_k }}
 <section id="dfracpartial-mathbfl3-partial-w3" class="level5">
 <h5 class="anchored" data-anchor-id="dfracpartial-mathbfl3-partial-w3"><span class="math inline">\(\dfrac{\partial \mathbf{l^3} }{\partial W^3}\)</span></h5>
 <p>As mentioned above, this is a 3-rank tensor with the shape <span class="math inline">\((512, 10, 10)\)</span> (how each element of <span class="math inline">\(l^3_n\)</span> changes with each weight <span class="math inline">\(W^3_{i,o}\)</span>). How can we even deal with this in our computation?</p>
-<p>Luckily, the structure of our layered neural network means that this can be significantly reduced, as most of the elements are zero. The strategy is to break the problem down to look at individual elements of <span class="math inline">\(\dfrac{\partial L}{\partial W^3_{i,o}}\)</span> and fill in each term-wise using the total derivative rule (<strong>Appendix B</strong>):</p>
+<p>Luckily, the structure of our layered neural network means that this can be significantly reduced, as most of the elements are zero. The strategy is to break the problem down to look at individual elements of <span class="math inline">\(\dfrac{\partial L}{\partial W^3_{i,o}}\)</span> and fill in each term-wise using the total derivative rule (<strong>Appendix 2</strong>):</p>
 <p><span class="math display">\[\begin{align}
 \dfrac{\partial L}{\partial W^3_{i,o}}
 &amp;= \dfrac{\partial L}{\partial l^3} \dfrac{\partial l^3}{\partial W^3_{i,o}}  \\
@@ -709,58 +709,93 @@ L(\mathbf{l^3}, y) = -\log \dfrac{ \exp{ l^3_y }}{ \sum_k \exp{ l^3_k }}
 <div id="9e907e85b1133c4e" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;ExecuteTime&quot;,&quot;value&quot;:{&quot;end_time&quot;:&quot;2025-12-09T20:17:12.207717Z&quot;,&quot;start_time&quot;:&quot;2025-12-09T20:17:12.202352Z&quot;}}">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MyStupidNetwork:  <span class="co"># + MySmarterNexwork</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, learning_rate<span class="op">=</span><span class="fl">0.05</span>):</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.a <span class="op">=</span> learning_rate</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>run <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MyBasicNetwork:</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, learning_rate<span class="op">=</span><span class="fl">0.02</span>):</span>
 <span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Define weight matrix (output dim, input dim) by convention</span></span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W1 <span class="op">=</span> np.random.uniform(<span class="dv">0</span>, <span class="fl">0.05</span>, (<span class="dv">28</span><span class="op">*</span><span class="dv">28</span>, <span class="dv">512</span>))</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W2 <span class="op">=</span> np.random.uniform(<span class="dv">0</span>, <span class="fl">0.05</span>, (<span class="dv">512</span>, <span class="dv">512</span>))</span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W3 <span class="op">=</span> np.random.uniform(<span class="dv">0</span>, <span class="fl">0.05</span>, (<span class="dv">512</span>, <span class="dv">10</span>))</span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> loss(<span class="va">self</span>, x, y):</span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">-</span> np.log( np.exp(x[y]) <span class="op">/</span> np.<span class="bu">sum</span>(np.exp(x)) )</span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> update_weights(<span class="va">self</span>, x, y):</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.a <span class="op">=</span> learning_rate</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Define weight matrix (output dim, input dim) by convention</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Use zero-mean Xavier init (good for sigmoid, it has little</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>        <span class="co"># effect here as we don't use activation functions,</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>        <span class="co"># but useful for comparison.)</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W1 <span class="op">=</span> np.random.randn(<span class="dv">784</span>, <span class="dv">512</span>) <span class="op">*</span> np.sqrt(<span class="dv">1</span> <span class="op">/</span> <span class="dv">784</span>)</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W2 <span class="op">=</span> np.random.randn(<span class="dv">512</span>, <span class="dv">512</span>) <span class="op">*</span> np.sqrt(<span class="dv">1</span> <span class="op">/</span> <span class="dv">512</span>)</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W3 <span class="op">=</span> np.random.randn(<span class="dv">512</span>, <span class="dv">10</span>) <span class="op">*</span> np.sqrt(<span class="dv">1</span> <span class="op">/</span> <span class="dv">512</span>)</span>
 <span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x.reshape(<span class="dv">1</span>, <span class="dv">10</span>)</span>
-<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Forward pass</span></span>
-<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>        l1 <span class="op">=</span> x <span class="op">@</span> <span class="va">self</span>.W1</span>
-<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>        l2 <span class="op">=</span> l1 <span class="op">@</span> <span class="va">self</span>.W2</span>
-<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>        l3 <span class="op">=</span> l2 <span class="op">@</span> <span class="va">self</span>.W3</span>
-<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> <span class="va">self</span>.loss(l3, y)</span>
-<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Loss: </span><span class="sc">{</span>loss<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 1) check these shapes, see why they must be wrong</span></span>
-<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 2) use out products and matrix multiplications. You will never</span></span>
-<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>        <span class="co"># be able to do this without paying very careful attention to the matrix shapes!!!</span></span>
-<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>        dloss_dl3 <span class="op">=</span> np.exp(l3) <span class="op">/</span> np.<span class="bu">sum</span>(np.exp(l3))</span>
-<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>        dloss_dl3[y] <span class="op">-=</span> <span class="dv">1</span></span>
-<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>        dl3_W3 <span class="op">=</span> l2</span>
-<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>        dl3_l2 <span class="op">=</span> <span class="va">self</span>.W3.T</span>
-<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>        dl2_W2 <span class="op">=</span> l1</span>
-<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>        dl2_l1 <span class="op">=</span> <span class="va">self</span>.W2.T</span>
-<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>        dl1_W1 <span class="op">=</span> x</span>
-<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>        dloss_dW3 <span class="op">=</span> dloss_dl3 <span class="op">*</span> dl3_W3</span>
-<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>        dloss_dW2 <span class="op">=</span> dloss_dl3 <span class="op">*</span> dl3_l2 <span class="op">*</span> dl2_W2</span>
-<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>        dloss_dW1 <span class="op">=</span> dloss_dl3 <span class="op">*</span> dl3_l2 <span class="op">*</span> dl2_l1 <span class="op">*</span> dl1_W1</span>
-<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W3 <span class="op">-=</span> <span class="va">self</span>.a <span class="op">*</span> dloss_dW3</span>
-<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W2 <span class="op">-=</span> <span class="va">self</span>.a <span class="op">*</span> dloss_dW2</span>
-<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W1 <span class="op">-=</span> <span class="va">self</span>.a <span class="op">*</span> dloss_dW1</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> loss(<span class="va">self</span>, l3, y):</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>        p <span class="op">=</span> <span class="va">self</span>.softmax(l3)[<span class="dv">0</span>][y]</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">-</span>np.log( p <span class="op">+</span> <span class="fl">1e-15</span>)</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> softmax(<span class="va">self</span>, vec):</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>        C <span class="op">=</span> np.<span class="bu">max</span>(vec)</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> np.exp(vec <span class="op">-</span> C) <span class="op">/</span> np.<span class="bu">sum</span>(np.exp(vec <span class="op">-</span> C))</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> predict(<span class="va">self</span>, x):</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>        <span class="co"># forward pass through the network</span></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x.reshape(<span class="dv">1</span>, x.size)</span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>        l1 <span class="op">=</span> x <span class="op">@</span> <span class="va">self</span>.W1</span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>        l2 <span class="op">=</span> l1 <span class="op">@</span> <span class="va">self</span>.W2</span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>        l3 <span class="op">=</span> l2 <span class="op">@</span> <span class="va">self</span>.W3</span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>        pred <span class="op">=</span> np.argmax(<span class="va">self</span>.softmax(l3))</span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> pred, l1, l2, l3</span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> update_weights(<span class="va">self</span>, x, y, verbose<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>        _, l1, l2, l3 <span class="op">=</span> <span class="va">self</span>.predict(x)</span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> <span class="va">self</span>.loss(l3, y)</span>
+<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> verbose:</span>
+<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"Loss: </span><span class="sc">{</span>loss<span class="sc">}</span><span class="ss">"</span>)</span>
 <span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> train_step(<span class="va">self</span>, x, y):</span>
-<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.update_weights(x, y)</span>
+<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Compute the derivatives</span></span>
+<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a>        dloss_dl3 <span class="op">=</span> <span class="va">self</span>.softmax(l3)  <span class="co"># double check this</span></span>
+<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a>        dloss_dl3[<span class="dv">0</span>][y] <span class="op">-=</span> <span class="dv">1</span></span>
 <span id="cb12-50"><a href="#cb12-50" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-51"><a href="#cb12-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-51"><a href="#cb12-51" aria-hidden="true" tabindex="-1"></a>        dloss_dW3 <span class="op">=</span> l2.T <span class="op">@</span> dloss_dl3       <span class="co"># (512, 10) = (512, 1) x (1, 10)</span></span>
 <span id="cb12-52"><a href="#cb12-52" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-53"><a href="#cb12-53" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-54"><a href="#cb12-54" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb12-53"><a href="#cb12-53" aria-hidden="true" tabindex="-1"></a>        dloss_dl2 <span class="op">=</span> dloss_dl3 <span class="op">@</span> <span class="va">self</span>.W3.T  <span class="co"># (1, 512) = (1, 10) x (10, 512)</span></span>
+<span id="cb12-54"><a href="#cb12-54" aria-hidden="true" tabindex="-1"></a>        dloss_dW2 <span class="op">=</span> l1.T <span class="op">@</span> dloss_dl2       <span class="co"># (512, 512) = (512, 1) x (1, 512)</span></span>
+<span id="cb12-55"><a href="#cb12-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-56"><a href="#cb12-56" aria-hidden="true" tabindex="-1"></a>        dloss_dl1 <span class="op">=</span> dloss_dl2 <span class="op">@</span> <span class="va">self</span>.W2.T  <span class="co"># (1, 512) = (1, 512) x (512, 512)</span></span>
+<span id="cb12-57"><a href="#cb12-57" aria-hidden="true" tabindex="-1"></a>        dloss_dW1 <span class="op">=</span> x.T <span class="op">@</span> dloss_dl1        <span class="co"># (784, 512) = (781, 1) x (1, 512)</span></span>
+<span id="cb12-58"><a href="#cb12-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-59"><a href="#cb12-59" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W3 <span class="op">-=</span> <span class="va">self</span>.a <span class="op">*</span> dloss_dW3</span>
+<span id="cb12-60"><a href="#cb12-60" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W2 <span class="op">-=</span> <span class="va">self</span>.a <span class="op">*</span> dloss_dW2</span>
+<span id="cb12-61"><a href="#cb12-61" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W1 <span class="op">-=</span> <span class="va">self</span>.a <span class="op">*</span> dloss_dW1</span>
+<span id="cb12-62"><a href="#cb12-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-63"><a href="#cb12-63" aria-hidden="true" tabindex="-1"></a><span class="co"># We won't run this here because it is very slow,</span></span>
+<span id="cb12-64"><a href="#cb12-64" aria-hidden="true" tabindex="-1"></a><span class="co"># but it gives an accuracy of ~73%</span></span>
+<span id="cb12-65"><a href="#cb12-65" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> run:</span>
+<span id="cb12-66"><a href="#cb12-66" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Initialise and train the model (no batching)</span></span>
+<span id="cb12-67"><a href="#cb12-67" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> MyBasicNetwork()</span>
+<span id="cb12-68"><a href="#cb12-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-69"><a href="#cb12-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-70"><a href="#cb12-70" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i, (X, y) <span class="kw">in</span> <span class="bu">enumerate</span>(training_data):</span>
+<span id="cb12-71"><a href="#cb12-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-72"><a href="#cb12-72" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> np.asarray(X[<span class="dv">0</span>, :, :])</span>
+<span id="cb12-73"><a href="#cb12-73" aria-hidden="true" tabindex="-1"></a>        y <span class="op">=</span> <span class="bu">int</span>(y)</span>
+<span id="cb12-74"><a href="#cb12-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-75"><a href="#cb12-75" aria-hidden="true" tabindex="-1"></a>        model.update_weights(x, y)</span>
+<span id="cb12-76"><a href="#cb12-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-77"><a href="#cb12-77" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> i <span class="op">%</span> <span class="dv">1000</span> <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb12-78"><a href="#cb12-78" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"Training iteration: sample: </span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb12-79"><a href="#cb12-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-80"><a href="#cb12-80" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Check the model accuracy</span></span>
+<span id="cb12-81"><a href="#cb12-81" aria-hidden="true" tabindex="-1"></a>    results <span class="op">=</span> np.empty(<span class="bu">len</span>(test_data))</span>
+<span id="cb12-82"><a href="#cb12-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-83"><a href="#cb12-83" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i, (X, y) <span class="kw">in</span> <span class="bu">enumerate</span>(test_data):</span>
+<span id="cb12-84"><a href="#cb12-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-85"><a href="#cb12-85" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> np.asarray(X[<span class="dv">0</span>, :, :])</span>
+<span id="cb12-86"><a href="#cb12-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-87"><a href="#cb12-87" aria-hidden="true" tabindex="-1"></a>        results[i] <span class="op">=</span> model.predict(x)[<span class="dv">0</span>] <span class="op">==</span> y</span>
+<span id="cb12-88"><a href="#cb12-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-89"><a href="#cb12-89" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Percent Correct: </span><span class="sc">{</span>np<span class="sc">.</span>mean(results) <span class="op">*</span> <span class="dv">100</span><span class="sc">}</span><span class="ss">%"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="a-better-model" class="level2">
@@ -919,6 +954,117 @@ l^2_o = \phi \left( \sum_i l^1_i W^2_{i, o} + b^2_o \right)
 \]</span></p>
 <p>TODO: add total derivative appendix TODO: add some pictures of neurons TODO: check all writing</p>
 <p>In sum, thank god for autodiff!</p>
+<div id="a1fdbd87" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>run <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MyBetterNetwork:</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, learning_rate<span class="op">=</span><span class="fl">0.02</span>):</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.a <span class="op">=</span> learning_rate</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Define weight matrix (output dim, input dim) by convention</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Use zero-mean Xavier init (good for sigmoid)</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>        <span class="co"># This makes a huge differences vs uniform.</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W1 <span class="op">=</span> np.random.randn(<span class="dv">784</span>, <span class="dv">512</span>) <span class="op">*</span> np.sqrt(<span class="dv">1</span> <span class="op">/</span> <span class="dv">784</span>)</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W2 <span class="op">=</span> np.random.randn(<span class="dv">512</span>, <span class="dv">512</span>) <span class="op">*</span> np.sqrt(<span class="dv">1</span> <span class="op">/</span> <span class="dv">512</span>)</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W3 <span class="op">=</span> np.random.randn(<span class="dv">512</span>, <span class="dv">10</span>) <span class="op">*</span> np.sqrt(<span class="dv">1</span> <span class="op">/</span> <span class="dv">512</span>)</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.b1 <span class="op">=</span> np.zeros((<span class="dv">1</span>, <span class="dv">512</span>))</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.b2 <span class="op">=</span> np.zeros((<span class="dv">1</span>, <span class="dv">512</span>))</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.b3 <span class="op">=</span> np.zeros((<span class="dv">1</span>, <span class="dv">10</span>))</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> loss(<span class="va">self</span>, l3, y):</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>        p <span class="op">=</span> <span class="va">self</span>.softmax(l3)[<span class="dv">0</span>][y]</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">-</span>np.log( p <span class="op">+</span> <span class="fl">1e-15</span>)</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> softmax(<span class="va">self</span>, vec):</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>        C <span class="op">=</span> np.<span class="bu">max</span>(vec)</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> np.exp(vec <span class="op">-</span> C) <span class="op">/</span> np.<span class="bu">sum</span>(np.exp(vec <span class="op">-</span> C))</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> predict(<span class="va">self</span>, x):</span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>        <span class="co"># forward pass through the network</span></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x.reshape(<span class="dv">1</span>, x.size)</span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>        l1_hat <span class="op">=</span> x <span class="op">@</span> <span class="va">self</span>.W1 <span class="op">+</span> <span class="va">self</span>.b1</span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>        l1 <span class="op">=</span> <span class="va">self</span>.phi(l1_hat)</span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>        l2_hat <span class="op">=</span> l1 <span class="op">@</span> <span class="va">self</span>.W2 <span class="op">+</span> <span class="va">self</span>.b2</span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>        l2 <span class="op">=</span> <span class="va">self</span>.phi(l2_hat)</span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>        l3 <span class="op">=</span> l2 <span class="op">@</span> <span class="va">self</span>.W3 <span class="op">+</span> <span class="va">self</span>.b3</span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a>        pred <span class="op">=</span> np.argmax(<span class="va">self</span>.softmax(l3))</span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> pred, l1_hat, l1, l2_hat, l2, l3</span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> phi(<span class="va">self</span>, vec):</span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="dv">1</span> <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> np.exp(<span class="op">-</span>vec))</span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> dphi_dvec(<span class="va">self</span>, vec):</span>
+<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> np.exp(<span class="op">-</span>vec) <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> np.exp(<span class="op">-</span>vec))<span class="op">**</span><span class="dv">2</span></span>
+<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> update_weights(<span class="va">self</span>, x, y, verbose<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x.reshape(<span class="dv">1</span>, x.size)</span>
+<span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-54"><a href="#cb13-54" aria-hidden="true" tabindex="-1"></a>        _, l1_hat, l1, l2_hat, l2, l3 <span class="op">=</span> <span class="va">self</span>.predict(x)</span>
+<span id="cb13-55"><a href="#cb13-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-56"><a href="#cb13-56" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> <span class="va">self</span>.loss(l3, y)</span>
+<span id="cb13-57"><a href="#cb13-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-58"><a href="#cb13-58" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> verbose:</span>
+<span id="cb13-59"><a href="#cb13-59" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"Loss: </span><span class="sc">{</span>loss<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb13-60"><a href="#cb13-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-61"><a href="#cb13-61" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Compute the derivatives</span></span>
+<span id="cb13-62"><a href="#cb13-62" aria-hidden="true" tabindex="-1"></a>        dloss_dl3 <span class="op">=</span> <span class="va">self</span>.softmax(l3)  <span class="co"># double check this</span></span>
+<span id="cb13-63"><a href="#cb13-63" aria-hidden="true" tabindex="-1"></a>        dloss_dl3[<span class="dv">0</span>][y] <span class="op">-=</span> <span class="dv">1</span></span>
+<span id="cb13-64"><a href="#cb13-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-65"><a href="#cb13-65" aria-hidden="true" tabindex="-1"></a>        dloss_dW3 <span class="op">=</span> l2.T <span class="op">@</span> dloss_dl3</span>
+<span id="cb13-66"><a href="#cb13-66" aria-hidden="true" tabindex="-1"></a>        dloss_db3 <span class="op">=</span> dloss_dl3</span>
+<span id="cb13-67"><a href="#cb13-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-68"><a href="#cb13-68" aria-hidden="true" tabindex="-1"></a>        dloss_dl2 <span class="op">=</span> dloss_dl3 <span class="op">@</span> <span class="va">self</span>.W3.T                               <span class="co"># (1, 512) = (1, 10) x (10, 512)</span></span>
+<span id="cb13-69"><a href="#cb13-69" aria-hidden="true" tabindex="-1"></a>        dloss_dW2 <span class="op">=</span> l1.T <span class="op">@</span> (<span class="va">self</span>.dphi_dvec(l2_hat) <span class="op">*</span> dloss_dl2)         <span class="co"># (512, 512) = (512, 1) x (1, 512) * (1, 512)</span></span>
+<span id="cb13-70"><a href="#cb13-70" aria-hidden="true" tabindex="-1"></a>        dloss_db2 <span class="op">=</span> <span class="va">self</span>.dphi_dvec(l2_hat) <span class="op">*</span> dloss_dl2                  <span class="co"># (1, 512) = (512, 1) x (1, 512)</span></span>
+<span id="cb13-71"><a href="#cb13-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-72"><a href="#cb13-72" aria-hidden="true" tabindex="-1"></a>        dloss_dl1 <span class="op">=</span> (dloss_dl2 <span class="op">*</span> <span class="va">self</span>.dphi_dvec(l2_hat)) <span class="op">@</span> <span class="va">self</span>.W2.T    <span class="co"># (1, 512) = (1, 512) * (1, 512) x (512, 512)</span></span>
+<span id="cb13-73"><a href="#cb13-73" aria-hidden="true" tabindex="-1"></a>        dloss_dW1 <span class="op">=</span> x.T <span class="op">@</span> (<span class="va">self</span>.dphi_dvec(l1_hat) <span class="op">*</span> dloss_dl1)          <span class="co"># (784, 512) = (784, 1) x (1, 512) * (1, 512)</span></span>
+<span id="cb13-74"><a href="#cb13-74" aria-hidden="true" tabindex="-1"></a>        dloss_db1 <span class="op">=</span> <span class="va">self</span>.dphi_dvec(l1_hat) <span class="op">*</span> dloss_dl1                  <span class="co"># (1, 512) = (1, 512) * (1, 512)</span></span>
+<span id="cb13-75"><a href="#cb13-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-76"><a href="#cb13-76" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W3 <span class="op">-=</span> <span class="va">self</span>.a <span class="op">*</span> dloss_dW3</span>
+<span id="cb13-77"><a href="#cb13-77" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W2 <span class="op">-=</span> <span class="va">self</span>.a <span class="op">*</span> dloss_dW2</span>
+<span id="cb13-78"><a href="#cb13-78" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W1 <span class="op">-=</span> <span class="va">self</span>.a <span class="op">*</span> dloss_dW1</span>
+<span id="cb13-79"><a href="#cb13-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-80"><a href="#cb13-80" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.b3 <span class="op">-=</span> <span class="va">self</span>.a <span class="op">*</span> dloss_db3</span>
+<span id="cb13-81"><a href="#cb13-81" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.b2 <span class="op">-=</span> <span class="va">self</span>.a <span class="op">*</span> dloss_db2</span>
+<span id="cb13-82"><a href="#cb13-82" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.b1 <span class="op">-=</span> <span class="va">self</span>.a <span class="op">*</span> dloss_db1</span>
+<span id="cb13-83"><a href="#cb13-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-84"><a href="#cb13-84" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialise and train the model (no batching)</span></span>
+<span id="cb13-85"><a href="#cb13-85" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> MyBetterNetwork()</span>
+<span id="cb13-86"><a href="#cb13-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-87"><a href="#cb13-87" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, (X, y) <span class="kw">in</span> <span class="bu">enumerate</span>(training_data):</span>
+<span id="cb13-88"><a href="#cb13-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-89"><a href="#cb13-89" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> np.asarray(X[<span class="dv">0</span>, :, :])</span>
+<span id="cb13-90"><a href="#cb13-90" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="bu">int</span>(y)</span>
+<span id="cb13-91"><a href="#cb13-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-92"><a href="#cb13-92" aria-hidden="true" tabindex="-1"></a>    model.update_weights(x, y, verbose<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb13-93"><a href="#cb13-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-94"><a href="#cb13-94" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> i <span class="op">%</span> <span class="dv">1000</span> <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb13-95"><a href="#cb13-95" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Training iteration: sample: </span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb13-96"><a href="#cb13-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-97"><a href="#cb13-97" aria-hidden="true" tabindex="-1"></a><span class="co"># We won't run this here because it is very slow,</span></span>
+<span id="cb13-98"><a href="#cb13-98" aria-hidden="true" tabindex="-1"></a><span class="co"># but it gives an accuracy of ~83%</span></span>
+<span id="cb13-99"><a href="#cb13-99" aria-hidden="true" tabindex="-1"></a><span class="co"># Check the model accuracy</span></span>
+<span id="cb13-100"><a href="#cb13-100" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> run:</span>
+<span id="cb13-101"><a href="#cb13-101" aria-hidden="true" tabindex="-1"></a>    results <span class="op">=</span> np.empty(<span class="bu">len</span>(test_data))</span>
+<span id="cb13-102"><a href="#cb13-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-103"><a href="#cb13-103" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i, (X, y) <span class="kw">in</span> <span class="bu">enumerate</span>(test_data):</span>
+<span id="cb13-104"><a href="#cb13-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-105"><a href="#cb13-105" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> np.asarray(X[<span class="dv">0</span>, :, :])</span>
+<span id="cb13-106"><a href="#cb13-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-107"><a href="#cb13-107" aria-hidden="true" tabindex="-1"></a>        results[i] <span class="op">=</span> model.predict(x)[<span class="dv">0</span>] <span class="op">==</span> y</span>
+<span id="cb13-108"><a href="#cb13-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-109"><a href="#cb13-109" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Percent Correct: </span><span class="sc">{</span>np<span class="sc">.</span>mean(results) <span class="op">*</span> <span class="dv">100</span><span class="sc">}</span><span class="ss">%"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <p><strong>Appendix 1</strong></p>
 <p>The cross entropy loss is:</p>
 <span class="math display">\[\begin{aligned}
@@ -937,6 +1083,24 @@ l^2_o = \phi \left( \sum_i l^1_i W^2_{i, o} + b^2_o \right)
 \]</span></p>
 <p>(by the derivative of <span class="math inline">\(\log x\)</span> rule). Note that the last term will be <span class="math inline">\(0\)</span> when the the input dimension is not <span class="math inline">\(y\)</span> (because it is treated as a scalar).</p>
 <p>We see that in the sum, the derivative of $ $ w.r.t <span class="math inline">\(l_{3, k}\)</span> is <span class="math inline">\(\exp{ l_{3, i} }\)</span> when <span class="math inline">\(i = k\)</span> and <span class="math inline">\(0\)</span> otherwise (as it is treated as a scalar). So whatever dimension <span class="math inline">\(i\)</span> of <span class="math inline">\(l_3\)</span>, we will input to the loss, we get <span class="math inline">\(\text{softmax}(\mathbf{l_3})_i\)</span> as the first term. But only when <span class="math inline">\(i = y\)</span> do we get <span class="math inline">\(-1\)</span> in the second term.</p>
+<p><strong>Appendix 2</strong></p>
+<p>In multivariate calculus, the total derivative rule captures how a function changes with respect to a variable that affects the function in multiple ways (through multiple intermediary functions).</p>
+<p>For example, let’s say we have the variable <span class="math inline">\(t\)</span> and let:</p>
+<p><span class="math display">\[
+w = f(x(t), y(t))
+\]</span></p>
+<p>The total derivative rule tells us how the output, <span class="math inline">\(w\)</span> changes with a small change in <span class="math inline">\(t\)</span>. Intuitively, it is the sum of how <span class="math inline">\(\delta t\)</span> changes <span class="math inline">\(w\)</span> through <span class="math inline">\(x(t)\)</span> and how <span class="math inline">\(\delta t\)</span> changes <span class="math inline">\(w\)</span> through <span class="math inline">\(y(t)\)</span>:</p>
+<p><span class="math display">\[
+\dfrac{dw}{dt} = \dfrac{\partial w}{ \partial x(t)} \dfrac{\partial x(t)}{ \partial t} + \dfrac{\partial w}{ \partial y(t)} \dfrac{\partial y(t)}{ \partial t}
+\]</span></p>
+<p>Note this is exactly analogous to our set up with the layers and weights. A small change in a unit in layer 2 will effect the loss through every unit in layer 3. Let’s look at unit 1 from layer 2 (<span class="math inline">\(l^2_1\)</span>) as an example. Here layer 3 units are a function taking <span class="math inline">\(l^2_1\)</span>, which is like <span class="math inline">\(t\)</span> in the above example, as an input:</p>
+<p><span class="math display">\[
+\text{loss} = L( \ l^3_1(l^2_1), \ l^3_2(l^2_1), \ ..., \ l^3_{10}(l^2_1) \ )
+\]</span></p>
+<p><span class="math display">\[
+\dfrac{\partial L}{ \partial l^2_1 } = \dfrac{\partial L}{ \partial l^3_1 } \dfrac{ \partial l^3_1}{ \partial l^2_1 } + \dfrac{\partial L}{ \partial l^3_2 } \dfrac{\partial l^3_2 }{ \partial l^2_1 } + ... + \dfrac{\partial L}{ \partial l^3_{10} } \dfrac{\partial l^3_{10} }{ \partial l^2_1 }
+\]</span></p>
+<p>Which is exactly what we do to deal with these derivatives.</p>
 </section>
 </section>
 </section>

@@ -21,7 +21,7 @@ test_data = datasets.FashionMNIST(
     transform=ToTensor()
 )
 
-class MyStupidNetwork:
+class MyBasicNetwork:
     def __init__(self, learning_rate=0.02):
 
         self.a = learning_rate
@@ -43,18 +43,20 @@ class MyStupidNetwork:
         return np.exp(vec - C) / np.sum(np.exp(vec - C))
 
     def predict(self, x):
-        x = x.reshape(1, x.size)
-        l3 = x @ self.W1 @ self.W2 @ self.W3
-        return np.argmax(self.softmax(l3))
-
-    def update_weights(self, x, y, verbose=False):
-
+        # forward pass through the network
         x = x.reshape(1, x.size)
 
-        # Forward pass
         l1 = x @ self.W1
         l2 = l1 @ self.W2
         l3 = l2 @ self.W3
+
+        pred = np.argmax(self.softmax(l3))
+
+        return pred, l1, l2, l3
+
+    def update_weights(self, x, y, verbose=False):
+
+        _, l1, l2, l3 = self.predict(x)
 
         loss = self.loss(l3, y)
 
@@ -78,9 +80,8 @@ class MyStupidNetwork:
         self.W1 -= self.a * dloss_dW1
 
 # Initialise and train the model (no batching)
-model = MyStupidNetwork()
+model = MyBasicNetwork()
 
-j = 0
 for i, (X, y) in enumerate(training_data):
 
     x = np.asarray(X[0, :, :])
@@ -89,7 +90,7 @@ for i, (X, y) in enumerate(training_data):
     model.update_weights(x, y)
 
     if i % 1000 == 0:
-        print(f"Training iteration: Epoch: {j}, round: {i}")
+        print(f"Training iteration: sample: {i}")
 
 # Check the model accuracy
 results = np.empty(len(test_data))
@@ -98,14 +99,10 @@ for i, (X, y) in enumerate(test_data):
 
     x = np.asarray(X[0, :, :])
 
-    results[i] = model.predict(x) == y
+    results[i] = model.predict(x)[0] == y
 
 print(f"Percent Correct: {np.mean(results) * 100}%")
 # 73%
 # 73%
 # with 3 epochs:
 # 74%
-breakpoint()
-W1 = model.W1
-W2 = model.W2
-W3 = model.W3
