@@ -1,0 +1,1 @@
+add section on information theory, odds, log odds / logits and how in the binary case they are equal the the NN logits
