@@ -1,0 +1,26 @@
+Datashuttle PRs
+
+0) respond to https://github.com/neuroinformatics-unit/datashuttle/issues/577
+
+- relax textual pin
+- Suggest next subject or session has confusing stacktrace - https://github.com/neuroinformatics-unit/datashuttle/issues/610
+- 'Go to project screen' button is at the far-right edge https://github.com/neuroinformatics-unit/datashuttle/issues/609
+- write up API docs
+
+- macOS keyboard shortcuts - https://github.com/neuroinformatics-unit/datashuttle/issues/617
+- reordering of get started section
+- add GIF to the website - https://github.com/neuroinformatics-unit/datashuttle/issues/576
+- shell=False               		 - https://github.com/neuroinformatics-unit/datashuttle/issues/639
+- #618, deselect 'All'              - 618 + https://github.com/neuroinformatics-unit/datashuttle/issues/537
+- catch Exception not BaseException - https://github.com/neuroinformatics-unit/datashuttle/issues/638
+- add typehints to transfer
+- Try to improve test speed + extend ssh, aws and gdrive tests		 - https://github.com/neuroinformatics-unit/datashuttle/issues/577 + https://github.com/neuroinformatics-unit/datashuttle/issues/577
+- #618, do not require clicking on the folder for select (auto-give focus)
+- review all call_rclone calls - https://github.com/neuroinformatics-unit/datashuttle/issues/599
+- refactor 'check and format names' https://github.com/neuroinformatics-unit/datashuttle/issues/598
+- validate broad vs narrow datatypes - https://github.com/neuroinformatics-unit/datashuttle/issues/466
+- do not allow blank sub- or ses-   - https://github.com/neuroinformatics-unit/datashuttle/issues/619
+
+
+4) Refine transfer arguments + implement API Review. For now, write up API review
+- https://github.com/neuroinformatics-unit/datashuttle/issues/624
