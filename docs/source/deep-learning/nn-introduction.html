@@ -396,12 +396,12 @@ Let <span class="math inline">\(l^1\)</span>, <span class="math inline">\(l^2\)<
     &amp;l^2(\mathbf{l^1}) = \mathbf{l^1}W^2 \ \ \ \ \text{(1, 512) x (512, 512) = (1, 512)} \\
     &amp;l^3(\mathbf{l^2}) = \mathbf{l^2}W^3 \ \ \ \ \text{(1, 512) x (512, 10) = (1, 10)}
 \end{aligned}\]</span>
-<p>All vectors are row vectors. The <span class="math inline">\(W\)</span> are our matrices of weights with shape (input, output): <span class="math inline">\(W^1\)</span> is <span class="math inline">\((10, 512)\)</span>, <span class="math inline">\(W^2\)</span> is <span class="math inline">\((512, 512)\)</span> and <span class="math inline">\(W^3\)</span> is <span class="math inline">\((512, 10)\)</span>. We can therefore index individual weights as <span class="math inline">\(W^3_{i, o}\)</span> where <span class="math inline">\(i\)</span> is the index of the input unit (i.e.&nbsp;the unit the weight connects from), and <span class="math inline">\(o\)</span> is the index of the output unit (i.e.&nbsp;the unit the weight connects to).</p>
+<p>All vectors are row vectors. The <span class="math inline">\(W\)</span> are our matrices of weights with shape (input, output): <span class="math inline">\(W^1\)</span> is <span class="math inline">\((784, 512)\)</span>, <span class="math inline">\(W^2\)</span> is <span class="math inline">\((512, 512)\)</span> and <span class="math inline">\(W^3\)</span> is <span class="math inline">\((512, 10)\)</span>. We can therefore index individual weights as <span class="math inline">\(W^3_{i, o}\)</span> where <span class="math inline">\(i\)</span> is the index of the input unit (i.e.&nbsp;the unit the weight connects from), and <span class="math inline">\(o\)</span> is the index of the output unit (i.e.&nbsp;the unit the weight connects to).</p>
 <p align="center">
 <img src="./nn-introduction/nn-image-labelled.png" width="400">
 </p>
 <p>Note that in practice this ‘network’ reduces to a single linear classifier of shape <span class="math inline">\((784, 10)\)</span>, so of course in reality we would never structure it like this. However, we will do it in this way first as a nice example.</p>
-<p><em>(An aside)</em>: This notation a little non-standard (often vectors are column vectors, and the weight matrix is shape (output, input) but this notation makes the derivations below much simpler. Also the layers are functions <span class="math inline">\(l^3(\cdot)\)</span> but can be treated as vectors <span class="math inline">\(\mathbf{l^3}\)</span> when evaluated. We will typically write them as vectors.</p>
+<p><em>(An aside)</em>: This notation is a little non-standard (often vectors are column vectors, and the weight matrix is shape (output, input) but this notation makes the derivations below much simpler. Also the layers are functions <span class="math inline">\(l^3(\cdot)\)</span> but can be treated as vectors <span class="math inline">\(\mathbf{l^3}\)</span> when evaluated. We will typically write them as vectors.</p>
 </section>
 <section id="the-loss" class="level3">
 <h3 class="anchored" data-anchor-id="the-loss">The Loss</h3>
@@ -409,7 +409,7 @@ Let <span class="math inline">\(l^1\)</span>, <span class="math inline">\(l^2\)<
 <p><span class="math display">\[
 L(\mathbf{l^3}, y) = -\log \dfrac{ \exp{ l^3_y }}{ \sum_k \exp{ l^3_k }}
 \]</span></p>
-<p>Here <span class="math inline">\(l^3_n\)</span> is the <span class="math inline">\(n\)</span>th element of our vector of logits, and <span class="math inline">\(y\)</span> is the index of the correct label for this image. The term after the <span class="math inline">\(\log\)</span> as the <a href="https://en.wikipedia.org/wiki/Softmax_function#:~:text=The%20softmax%20function%2C%20also%20known,used%20in%20multinomial%20logistic%20regression">softmax function</a> which normalises the logits to probabilities. Therefore, given an input image <span class="math inline">\(\mathbf{x}\)</span> the model returns a probability distribution over the labels <span class="math inline">\(y\)</span>. <a href="https://cs231n.github.io/linear-classify/">This article</a> as a nice, deeper discussion of the Cross Entropy Loss.</p>
+<p>Here <span class="math inline">\(l^3_n\)</span> is the <span class="math inline">\(n\)</span>th element of our vector of logits, and <span class="math inline">\(y\)</span> is the index of the correct label for this image. The term after the <span class="math inline">\(\log\)</span> is the <a href="https://en.wikipedia.org/wiki/Softmax_function#:~:text=The%20softmax%20function%2C%20also%20known,used%20in%20multinomial%20logistic%20regression">softmax function</a> which normalises the logits to probabilities. Therefore, given an input image <span class="math inline">\(\mathbf{x}\)</span> the model returns a probability distribution over the labels <span class="math inline">\(y\)</span>. <a href="https://cs231n.github.io/linear-classify/">This article</a> has a nice, deeper discussion of the Cross Entropy Loss.</p>
 <p>Clearly, we want this probability to be high (ideally <span class="math inline">\(1\)</span> for the correct label, <span class="math inline">\(0\)</span> for every other label). So this loss makes intuitive sense, we are maximising the probability the network returns for the correct label. Here, we equivalently minimise the negative log probability.</p>
 </section>
 <section id="predicting-a-label-from-an-image---the-forward-pass" class="level3">
@@ -417,24 +417,24 @@ L(\mathbf{l^3}, y) = -\log \dfrac{ \exp{ l^3_y }}{ \sum_k \exp{ l^3_k }}
 <p>To predict a label for an image <span class="math inline">\(\mathbf{x}\)</span>, we apply the defined model to compute the logits:</p>
 <span class="math display">\[\begin{aligned}
 \mathbf{l^3} &amp;= l^3(l^2(l^1(\mathbf{x}))) \\
-             &amp;= (((\mathbf{x}W^1) W^2) W^3 \\
+             &amp;= ((\mathbf{x}W^1) W^2) W^3 \\
              &amp;=  \mathbf{x}W^1 W^2 W^3 \\
 \end{aligned}\]</span>
 <p>The predicted label is the one that maximises the probability as computed by the softmax function:</p>
 <p><span class="math display">\[
 \hat{y} = \arg\max_{y} \, \mathrm{softmax}(\mathbf{l^3})_y
 \]</span></p>
-<p>In other words, the predicted label is the one the one the model assigns the highest probability to (recall <span class="math inline">\(y\)</span> is the index of the correct label).</p>
+<p>In other words, the predicted label is the one the model assigns the highest probability to (recall <span class="math inline">\(y\)</span> is the index of the correct label).</p>
 </section>
 <section id="backpropagation-in-our-simple-network" class="level3">
 <h3 class="anchored" data-anchor-id="backpropagation-in-our-simple-network">Backpropagation in our simple network</h3>
-<p>We want to find the set of weights that minimise the loss function. The loss function is a multivariate function over the space of parameters. Therefore, we can minimise the loss with respect to the parameters through <a href="https://en.wikipedia.org/wiki/Gradient_descent">gradient descent</a>. For this, we need to compute the deriative of the loss with respect to the parameters.</p>
-<p>For example, take <span class="math inline">\(W^3_{1,2}\)</span> that connects the first neuron from layer 2 to the second neuron in layer 3. How does a small change in this weight change the output of our loss function? A small change in <span class="math inline">\(W^3_{1,2}\)</span> will result in a small change in the second neuron in layer 3 (<span class="math inline">\(l^3_2\)</span>)—which will directly affect the loss function <span class="math inline">\(L(\mathbf{l^3})\)</span>. This ‘chain’ of dependencies is capture by chain rule:</p>
+<p>We want to find the set of weights that minimise the loss function. The loss function is a multivariate function over the space of parameters. Therefore, we can minimise the loss with respect to the parameters through <a href="https://en.wikipedia.org/wiki/Gradient_descent">gradient descent</a>. For this, we need to compute the derivative of the loss with respect to the parameters.</p>
+<p>For example, take <span class="math inline">\(W^3_{1,2}\)</span> that connects the first neuron from layer 2 to the second neuron in layer 3. How does a small change in this weight change the output of our loss function? A small change in <span class="math inline">\(W^3_{1,2}\)</span> will result in a small change in the second neuron in layer 3 (<span class="math inline">\(l^3_2\)</span>)—which will directly affect the loss function <span class="math inline">\(L(\mathbf{l^3})\)</span>. This ‘chain’ of dependencies is captured by the chain rule:</p>
 <span class="math display">\[\begin{aligned}
 &amp;\dfrac{\partial L(\mathbf{l^3})}{\partial W^3_{1,2}} = \dfrac{\partial L(\mathbf{l^3})}{\partial l^3_2}  \dfrac{\partial l^3_2 }{\partial W^3_{1,2}}
 \end{aligned}\]</span>
-<p>Instead of focusing on a single unit in layer 2, we can write the derivative with respect to the vector of layer 2 units. Because we have <span class="math inline">\(512\)</span> layer 2 units, this will be a <span class="math inline">\(1, 512\)</span>) vector of partial derivatives where each element indicates how the loss changes with a layer 2 unit <span class="math inline">\(l^2_i\)</span>.</p>
-<p>Also, from now on, we will write the loss as <span class="math inline">\(L\)</span> instead of <span class="math inline">\(L(\mathbf{l^3})\)</span> for brevity, but it is useful to remember it a function of out output layer. Together:</p>
+<p>Instead of focusing on a single unit in layer 2, we can write the derivative with respect to the vector of layer 2 units. Because we have <span class="math inline">\(512\)</span> layer 2 units, this will be a <span class="math inline">\((1, 512)\)</span> vector of partial derivatives where each element indicates how the loss changes with a layer 2 unit <span class="math inline">\(l^2_i\)</span>.</p>
+<p>Also, from now on, we will write the loss as <span class="math inline">\(L\)</span> instead of <span class="math inline">\(L(\mathbf{l^3})\)</span> for brevity, but it is useful to remember it is a function of the output layer. Together:</p>
 <span class="math display">\[\begin{aligned}
 &amp;\dfrac{\partial L}{\partial W^3} = \dfrac{\partial L}{\partial \mathbf{l^3}}   \dfrac{\partial \mathbf{l^3} }{\partial W^3}
 \end{aligned}\]</span>
@@ -450,13 +450,13 @@ L(\mathbf{l^3}, y) = -\log \dfrac{ \exp{ l^3_y }}{ \sum_k \exp{ l^3_k }}
 <section id="understanding-each-term-with-matrix-calculus" class="level4">
 <h4 class="anchored" data-anchor-id="understanding-each-term-with-matrix-calculus">Understanding each term with <a href="https://en.wikipedia.org/wiki/Matrix_calculus">matrix calculus</a></h4>
 <p>To review what these terms are, because the notation is doing a lot of heavy lifting and hiding complexity:</p>
-<p><span class="math inline">\(\dfrac{\partial L}{\partial W^2}\)</span>, <span class="math inline">\(L\)</span> is a scalar-valued function (it takes as an input a vector of length <span class="math inline">\(10\)</span>, the output of layer 3, and returns a scalar). We take the deriative of this with respect to a matrix. This is a <span class="math inline">\((512, 10)\)</span> matrix (the size of <span class="math inline">\(W^3\)</span>) where each entry indicates how each individual weight <span class="math inline">\(W^3_{i,o}\)</span> affects the loss.</p>
-<p><span class="math inline">\(\dfrac{\partial \mathbf{l^2}}{\partial \mathbf{l^3}}\)</span> is the derivative of a vector-valued function (it outputs a vector, of length <span class="math inline">\(512\)</span>) with respect to a vector. This is the Jacobian, which each element indicating how element <span class="math inline">\(l^2\)</span> affects each element in <span class="math inline">\(l^3\)</span>. As layer 3 has <span class="math inline">\(10\)</span> neurons and layer 2 has <span class="math inline">\(512\)</span>, we will have a <span class="math inline">\((10, 512)\)</span> matrix of partial derivatives.</p>
-<p><span class="math inline">\(\dfrac{\partial \mathbf{l^2} }{\partial W^3}\)</span> asks how a small change in each weight in <span class="math inline">\(W^2\)</span> will affect each dimension in <span class="math inline">\(\mathbf{l^2}\)</span>. We will have a <span class="math inline">\((512, 512, 512)\)</span>, rank-3 tensor!</p>
+<p><span class="math inline">\(\dfrac{\partial L}{\partial W^3}\)</span>, <span class="math inline">\(L\)</span> is a scalar-valued function (it takes as an input a vector of length <span class="math inline">\(10\)</span>, the output of layer 3, and returns a scalar). We take the derivative of this with respect to a matrix. This is a <span class="math inline">\((512, 10)\)</span> matrix (the size of <span class="math inline">\(W^3\)</span>) where each entry indicates how each individual weight <span class="math inline">\(W^3_{i,o}\)</span> affects the loss.</p>
+<p><span class="math inline">\(\dfrac{\partial \mathbf{l^3}}{\partial \mathbf{l^2}}\)</span> is the derivative of a vector-valued function (it outputs a vector, of length <span class="math inline">\(10\)</span>) with respect to a vector (length <span class="math inline">\(512\)</span>). This is the Jacobian, with each elements indicating how element in <span class="math inline">\(l^2\)</span> affects each element in <span class="math inline">\(l^3\)</span>. As layer 3 has <span class="math inline">\(10\)</span> neurons and layer 2 has <span class="math inline">\(512\)</span>, we will have a <span class="math inline">\((10, 512)\)</span> matrix of partial derivatives.</p>
+<p><span class="math inline">\(\dfrac{\partial \mathbf{l^2} }{\partial W^2}\)</span> captures how a small change in each weight in <span class="math inline">\(W^2\)</span> will affect each dimension in <span class="math inline">\(\mathbf{l^2}\)</span>. We will have a <span class="math inline">\((512, 512, 512)\)</span>, rank-3 tensor!</p>
 </section>
 <section id="computing-the-derivatives-of-the-loss-with-respect-to-w3" class="level4">
 <h4 class="anchored" data-anchor-id="computing-the-derivatives-of-the-loss-with-respect-to-w3">Computing the derivatives of the loss with respect to <span class="math inline">\(W^3\)</span></h4>
-<p>Fortunately the structure of our network means we can simply this a lot as many of these partial derivatives are zero. First we will look in detail at computing the derivative of the loss with respect to the weights connected to the final layer:</p>
+<p>Fortunately the structure of our network means we can simplify this a lot as many of these partial derivatives are zero. First we will look in detail at computing the derivative of the loss with respect to the weights connected to the final layer:</p>
 <p><span class="math display">\[
 \dfrac{\partial L}{\partial W^3} = \dfrac{\partial L}{\partial \mathbf{l^3}}   \dfrac{\partial \mathbf{l^3} }{\partial W^3}
 \]</span></p>
@@ -475,13 +475,13 @@ L(\mathbf{l^3}, y) = -\log \dfrac{ \exp{ l^3_y }}{ \sum_k \exp{ l^3_k }}
 </section>
 <section id="dfracpartial-lpartial-mathbfl3" class="level5">
 <h5 class="anchored" data-anchor-id="dfracpartial-lpartial-mathbfl3"><span class="math inline">\(\dfrac{\partial L}{\partial \mathbf{l^3}}\)</span></h5>
-<p>This is the derivative of a scalar-valued loss function with respect to a vector. It isa a <span class="math inline">\(10\)</span>-dimensional vector of partial derivatives, where each entry captures the loss changes with respect to a change in that unit of layer 3.</p>
+<p>This is the derivative of a scalar-valued loss function with respect to a vector. It is a <span class="math inline">\(10\)</span>-dimensional vector of partial derivatives, where each entry captures the loss changes with respect to a change in that unit of layer 3.</p>
 <p>We can evaluate the derivative of the cross entropy loss directly:</p>
 <p><span class="math display">\[
-\dfrac{\partial }{\partial l^3_n} =  - \log \dfrac{e^{l^3_y}}{\sum_n e^{l^3_n}} = \text{softmax}(l^3_n) - \delta_{n, y}
+\dfrac{\partial L }{\partial l^3_n} = \text{softmax}(l^3)_n - \delta_{n, y}
 \]</span></p>
-<p>Where <span class="math inline">\(\delta\)</span> is the <a href="https://en.wikipedia.org/wiki/Kronecker_delta">Kronecker delta</a> that equals <span class="math inline">\(1\)</span> when <span class="math inline">\(n=y\)</span> and <span class="math inline">\(0\)</span> otherwise. This says that our vector of derivatives is <span class="math inline">\(\text{softmax}(l^3_n)\)</span> for all output logits in layer 3 that are for the incorrect labels, and <span class="math inline">\(\text{softmax}(l^3_n) - 1\)</span> for the index of the true label <span class="math inline">\(y\)</span>.</p>
-<p>See <strong>Appendix 1</strong> for the derivation. In full this looks like:</p>
+<p>Where <span class="math inline">\(\delta\)</span> is the <a href="https://en.wikipedia.org/wiki/Kronecker_delta">Kronecker delta</a> that equals <span class="math inline">\(1\)</span> when <span class="math inline">\(n=y\)</span> and <span class="math inline">\(0\)</span> otherwise. This says that our vector of derivatives is <span class="math inline">\(\text{softmax}(l^3)_n\)</span> for all output logits in layer 3 that are for the incorrect labels, and <span class="math inline">\(\text{softmax}(l^3)_n - 1\)</span> for the index of the true label <span class="math inline">\(y\)</span>.</p>
+<p>See <strong>Appendix 1</strong> for the derivation. In full (show as column vectors here) this looks like:</p>
 <p><span class="math display">\[
 \dfrac{ \partial L}{ \partial \mathbf{l^3} } =
 \begin{bmatrix}
@@ -551,14 +551,14 @@ L(\mathbf{l^3}, y) = -\log \dfrac{ \exp{ l^3_y }}{ \sum_k \exp{ l^3_k }}
 </section>
 <section id="computing-the-derivatives-with-respect-to-w2" class="level4">
 <h4 class="anchored" data-anchor-id="computing-the-derivatives-with-respect-to-w2">Computing the derivatives with respect to <span class="math inline">\(W^2\)</span></h4>
-<p>Next, we are interested in how chnging a weight in layer 2 <span class="math inline">\(W^2_{i,o}\)</span> changes the output of layer 2, how this changes layer 3, and how this effects the loss.</p>
+<p>Next, we are interested in how changing a weight in layer 2 <span class="math inline">\(W^2_{i,o}\)</span> changes the output of layer 2, how this changes layer 3, and how this affects the loss.</p>
 <p><span class="math display">\[
 \dfrac{\partial L}{\partial W^2} = \dfrac{\partial L}{\partial \mathbf{l^3}}  \dfrac{\partial \mathbf{l^3}}{\partial \mathbf{l^2}}  \dfrac{\partial \mathbf{l^2} }{\partial W^2}
 \]</span></p>
 <p>We have seen similar terms to all of these above, except for the middle term on the right hand side, the Jacobian.</p>
 <section id="dfracpartial-mathbfl3partial-mathbfl2" class="level5">
 <h5 class="anchored" data-anchor-id="dfracpartial-mathbfl3partial-mathbfl2"><span class="math inline">\(\dfrac{\partial \mathbf{l^3}}{\partial \mathbf{l^2}}\)</span></h5>
-<p>This is the Jacobian. It is <span class="math inline">\((10, 512)\)</span> and contains the derivative of each element in <span class="math inline">\(\mathbf{l^2}\)</span> with respect to each element in <span class="math inline">\(\mathbf{l^3}\)</span>:</p>
+<p>This is the Jacobian. It is <span class="math inline">\((10, 512)\)</span> and contains the derivative of each element in <span class="math inline">\(\mathbf{l^3}\)</span> with respect to each element in <span class="math inline">\(\mathbf{l^2}\)</span>:</p>
 <span class="math display">\[\begin{aligned}
 \dfrac{\partial \mathbf{l^3}}{\partial \mathbf{l^2}} =
 \begin{bmatrix}
@@ -577,7 +577,7 @@ L(\mathbf{l^3}, y) = -\log \dfrac{ \exp{ l^3_y }}{ \sum_k \exp{ l^3_k }}
     \sum_o \dfrac{ \partial L }{ \partial l^3_o } \dfrac{\partial l^3_o }{ \partial l^2_{512} }
 \end{bmatrix}
 \end{aligned}\]</span>
-<p>Because each unit of layer 2 is connected to every unit of layer 3, so to understand how a change in unit in layer 2 effects the loss, we sum over its effect on every unit in layer 3. While the derivatives don’t go to zero like in the <span class="math inline">\(W^3\)</span> case above, each individual derivative is simple to compute:</p>
+<p>Because each unit of layer 2 is connected to every unit of layer 3, so to understand how a change in unit in layer 2 affects the loss, we sum over its effect on every unit in layer 3. While the derivatives don’t go to zero like in the <span class="math inline">\(W^3\)</span> case above, each individual derivative is simple to compute:</p>
 <p><span class="math display">\[
 \dfrac{\partial l^3_o }{ \partial l^2_i } = \dfrac{\partial l^2_i W^3_{i, o} }{ \partial l^2_i } = W^3_{i, o}
 \]</span></p>
@@ -597,7 +597,7 @@ L(\mathbf{l^3}, y) = -\log \dfrac{ \exp{ l^3_y }}{ \sum_k \exp{ l^3_k }}
 </section>
 <section id="computing-the-partial-derivatives-of-w1" class="level5">
 <h5 class="anchored" data-anchor-id="computing-the-partial-derivatives-of-w1">Computing the partial derivatives of <span class="math inline">\(W^1\)</span></h5>
-<p>Since we have done through all of the hard work of really inspecting what is going on under the hood, we can really simply the notation going forward. This compact notation really highlights the ‘chain’ aspect of the chain rule:</p>
+<p>Since we have done through all of the hard work of really inspecting what is going on under the hood, we can really simplify the notation going forward. This compact notation really highlights the ‘chain’ aspect of the chain rule:</p>
 <p><span class="math display">\[
 \dfrac{\partial L}{\partial W^1} = \dfrac{\partial L}{\partial \mathbf{l^3}}  \dfrac{\partial \mathbf{l^3}}{\partial \mathbf{l^2}}  \dfrac{\partial \mathbf{l^2}}{\partial \mathbf{l^1}}  \dfrac{\partial \mathbf{l^1} }{\partial W^1}
 \]</span></p>
@@ -617,7 +617,7 @@ L(\mathbf{l^3}, y) = -\log \dfrac{ \exp{ l^3_y }}{ \sum_k \exp{ l^3_k }}
 \]</span></p>
 <p><span class="math inline">\((512, 512) = (512, 1) \times (1, 512)\)</span></p>
 <p><strong>It’s worth reflecting on this. We have such complexity here. And it reduces really nicely.</strong> It’s awesome to see how changing the derivatives, backwards from the final layer, greatly simplifies computing the derivatives for our complex, fully connected network.</p>
-<p>It is also very easy to compte, because we already have our weight vectors and we compute the output of each layer as part of our forward pass!</p>
+<p>It is also very easy to compute, because we already have our weight vectors and we compute the output of each layer as part of our forward pass!</p>
 </section>
 </section>
 </section>
