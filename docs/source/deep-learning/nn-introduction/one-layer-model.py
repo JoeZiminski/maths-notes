@@ -30,12 +30,10 @@ class MyBasicNetwork:
         # Use zero-mean Xavier init (good for sigmoid, it has little
         # effect here as we don't use activation functions,
         # but useful for comparison.)
-        self.W1 = np.random.randn(784, 512) * np.sqrt(1 / 784)
-        self.W2 = np.random.randn(512, 512) * np.sqrt(1 / 512)
-        self.W3 = np.random.randn(512, 10) * np.sqrt(1 / 512)
+        self.W = np.random.randn(784, 10) * np.sqrt(1 / 10)
 
-    def loss(self, l3, y):
-        p = self.softmax(l3)[0][y]
+    def loss(self, l, y):
+        p = self.softmax(l)[0][y]
         return -np.log( p + 1e-15)
 
     def softmax(self, vec):
@@ -46,41 +44,33 @@ class MyBasicNetwork:
         # forward pass through the network
         x = x.reshape(1, x.size)
 
-        l1 = x @ self.W1
-        l2 = l1 @ self.W2
-        l3 = l2 @ self.W3
+        l = x @ self.W
 
-        pred = np.argmax(self.softmax(l3))
+        pred = np.argmax(self.softmax(l))
 
-        return pred, x, l1, l2, l3
+        return pred, x, l
 
     def update_weights(self, x, y, verbose=False):
 
-        _, x, l1, l2, l3 = self.predict(x)
+        _, x, l = self.predict(x)
 
-        loss = self.loss(l3, y)
+        loss = self.loss(l, y)
 
         if verbose:
             print(f"Loss: {loss}")
 
         # Compute the derivatives
-        dloss_dl3 = self.softmax(l3)  # double check this
-        dloss_dl3[0][y] -= 1
+        dloss_dl = self.softmax(l)
+        dloss_dl[0][y] -= 1
 
-        dloss_dW3 = l2.T @ dloss_dl3       # (512, 10) = (512, 1) x (1, 10)
+        dloss_dW = x.T @ dloss_dl       # (512, 10) = (512, 1) x (1, 10)
 
-        dloss_dl2 = dloss_dl3 @ self.W3.T  # (1, 512) = (1, 10) x (10, 512)
-        dloss_dW2 = l1.T @ dloss_dl2       # (512, 512) = (512, 1) x (1, 512)
-
-        dloss_dl1 = dloss_dl2 @ self.W2.T  # (1, 512) = (1, 512) x (512, 512)
-        dloss_dW1 = x.T @ dloss_dl1        # (784, 512) = (781, 1) x (1, 512)
-
-        self.W3 -= self.a * dloss_dW3
-        self.W2 -= self.a * dloss_dW2
-        self.W1 -= self.a * dloss_dW1
+        self.W -= self.a * dloss_dW
 
 # Initialise and train the model (no batching)
 model = MyBasicNetwork()
+
+
 
 for i, (X, y) in enumerate(training_data):
 
@@ -102,7 +92,3 @@ for i, (X, y) in enumerate(test_data):
     results[i] = model.predict(x)[0] == y
 
 print(f"Percent Correct: {np.mean(results) * 100}%")
-# 73%
-# 73%
-# with 3 epochs:
-# 74%

@@ -194,9 +194,6 @@ Shape of y: torch.Size([64]) torch.int64</code></pre>
 </section>
 <section id="the-model" class="level3">
 <h3 class="anchored" data-anchor-id="the-model">The Model</h3>
-<p>Very breifly explain as above, we have our layers (783, 512, 512) and ReLu activation function. We have weights and parameters.</p>
-<p>It is worth noting how flexible the neural network approach is compared to designing an explicit parametric model. All we need to do is specify an input size (here <span class="math inline">\(784\)</span>) and an output size (here <span class="math inline">\(10\)</span>) appropriate for the problem of interest. The internal architecture can, in principle, be treated as a black box (although in practice it should not be), unlike many parametric models where the model structure must directly reflect assumptions about the underlying data-generating process.</p>
-<p><strong>TODO</strong> What makes this approach powerful is that the network can be shaped to approximate a complex function through iterative parameter updates driven by its prediction errors on the training data. In effect, the model is refined “from the output backward” via backpropagation, without explicitly specifying the functional form.</p>
 <div id="b0e4b7b8959226d1" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;ExecuteTime&quot;,&quot;value&quot;:{&quot;end_time&quot;:&quot;2025-12-17T01:17:05.966632Z&quot;,&quot;start_time&quot;:&quot;2025-12-17T01:17:05.955158Z&quot;}}" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>device <span class="op">=</span> <span class="st">"cuda"</span> <span class="cf">if</span> torch.cuda.is_available() <span class="cf">else</span> <span class="st">"cpu"</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Using </span><span class="sc">{</span>device<span class="sc">}</span><span class="ss">"</span>)</span>
@@ -243,8 +240,7 @@ NeuralNetwork(
 </div>
 <section id="optimising-the-model" class="level4">
 <h4 class="anchored" data-anchor-id="optimising-the-model">Optimising the Model</h4>
-<p>We use the cross-entropy loss, this basically tells us XXX. We go into this in more detail in the next section.</p>
-<p>Explain derivative of loss wrt paramters very high level, this is not the place to go on about optimisiation</p>
+<p>We use the cross-entropy loss (going into this in more detail in the next section).</p>
 <div id="8970d571e3f7ae62" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;ExecuteTime&quot;,&quot;value&quot;:{&quot;end_time&quot;:&quot;2025-12-17T01:17:05.982365Z&quot;,&quot;start_time&quot;:&quot;2025-12-17T01:17:05.977660Z&quot;}}" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>loss_fn <span class="op">=</span> nn.CrossEntropyLoss()</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> torch.optim.SGD(model.parameters(), lr<span class="op">=</span><span class="fl">1e-3</span>)</span>
@@ -289,7 +285,7 @@ Size: torch.Size([10])
 </section>
 <section id="training-the-model" class="level3">
 <h3 class="anchored" data-anchor-id="training-the-model">Training the Model</h3>
-<p>Just breifly explain what is going on below</p>
+<p>We train the model over the (batched) training data, updating the parametrs based on the derivative of the loss with respect to the parameters.</p>
 <div id="da357b6fe6802954" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;ExecuteTime&quot;,&quot;value&quot;:{&quot;end_time&quot;:&quot;2025-12-17T01:17:14.011311Z&quot;,&quot;start_time&quot;:&quot;2025-12-17T01:17:05.997031Z&quot;}}" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train(dataloader, model, loss_fn, optimizer):</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    size <span class="op">=</span> <span class="bu">len</span>(dataloader.dataset)</span>
@@ -314,7 +310,7 @@ Size: torch.Size([10])
 </section>
 <section id="testing-the-model" class="level3">
 <h3 class="anchored" data-anchor-id="testing-the-model">Testing the Model</h3>
-<p>and the accuracy. In the next section we will…</p>
+<p>Now run the model over the test data and compute the accuracy:</p>
 <div id="7d2a9d6f22016a93" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;ExecuteTime&quot;,&quot;value&quot;:{&quot;end_time&quot;:&quot;2025-12-17T01:18:17.002612Z&quot;,&quot;start_time&quot;:&quot;2025-12-17T01:17:14.028427Z&quot;}}" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> test(dataloader, model, loss_fn):</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">""""""</span></span>
@@ -396,7 +392,7 @@ Let <span class="math inline">\(l^1\)</span>, <span class="math inline">\(l^2\)<
     &amp;l^2(\mathbf{l^1}) = \mathbf{l^1}W^2 \ \ \ \ \text{(1, 512) x (512, 512) = (1, 512)} \\
     &amp;l^3(\mathbf{l^2}) = \mathbf{l^2}W^3 \ \ \ \ \text{(1, 512) x (512, 10) = (1, 10)}
 \end{aligned}\]</span>
-<p>All vectors are row vectors. The <span class="math inline">\(W\)</span> are our matrices of weights with shape (input, output): <span class="math inline">\(W^1\)</span> is <span class="math inline">\((784, 512)\)</span>, <span class="math inline">\(W^2\)</span> is <span class="math inline">\((512, 512)\)</span> and <span class="math inline">\(W^3\)</span> is <span class="math inline">\((512, 10)\)</span>. We can therefore index individual weights as <span class="math inline">\(W^3_{i, o}\)</span> where <span class="math inline">\(i\)</span> is the index of the input unit (i.e.&nbsp;the unit the weight connects from), and <span class="math inline">\(o\)</span> is the index of the output unit (i.e.&nbsp;the unit the weight connects to).</p>
+<p>All vectors are row vectors. The <span class="math inline">\(W\)</span> are our matrices of weights with shape (input, output): <span class="math inline">\(W^1\)</span> is <span class="math inline">\((784, 512)\)</span>, <span class="math inline">\(W^2\)</span> is <span class="math inline">\((512, 512)\)</span> and <span class="math inline">\(W^3\)</span> is <span class="math inline">\((512, 10)\)</span>. We can therefore index individual weights as <span class="math inline">\(W^3_{i, o}\)</span> where <span class="math inline">\(i\)</span> is the index of the input node (i.e.&nbsp;the node the weight connects from), and <span class="math inline">\(o\)</span> is the index of the output node (i.e.&nbsp;the node the weight connects to).</p>
 <p align="center">
 <img src="./nn-introduction/nn-image-labelled.png" width="400">
 </p>
@@ -433,7 +429,7 @@ L(\mathbf{l^3}, y) = -\log \dfrac{ \exp{ l^3_y }}{ \sum_k \exp{ l^3_k }}
 <span class="math display">\[\begin{aligned}
 &amp;\dfrac{\partial L(\mathbf{l^3})}{\partial W^3_{1,2}} = \dfrac{\partial L(\mathbf{l^3})}{\partial l^3_2}  \dfrac{\partial l^3_2 }{\partial W^3_{1,2}}
 \end{aligned}\]</span>
-<p>Instead of focusing on a single unit in layer 2, we can write the derivative with respect to the vector of layer 2 units. Because we have <span class="math inline">\(512\)</span> layer 2 units, this will be a <span class="math inline">\((1, 512)\)</span> vector of partial derivatives where each element indicates how the loss changes with a layer 2 unit <span class="math inline">\(l^2_i\)</span>.</p>
+<p>Instead of focusing on a single node in layer 2, we can write the derivative with respect to the vector of layer 2 nodes. Because we have <span class="math inline">\(512\)</span> layer 2 nodes, this will be a <span class="math inline">\((1, 512)\)</span> vector of partial derivatives where each element indicates how the loss changes with a layer 2 node <span class="math inline">\(l^2_i\)</span>.</p>
 <p>Also, from now on, we will write the loss as <span class="math inline">\(L\)</span> instead of <span class="math inline">\(L(\mathbf{l^3})\)</span> for brevity, but it is useful to remember it is a function of the output layer. Together:</p>
 <span class="math display">\[\begin{aligned}
 &amp;\dfrac{\partial L}{\partial W^3} = \dfrac{\partial L}{\partial \mathbf{l^3}}   \dfrac{\partial \mathbf{l^3} }{\partial W^3}
@@ -475,7 +471,7 @@ L(\mathbf{l^3}, y) = -\log \dfrac{ \exp{ l^3_y }}{ \sum_k \exp{ l^3_k }}
 </section>
 <section id="dfracpartial-lpartial-mathbfl3" class="level5">
 <h5 class="anchored" data-anchor-id="dfracpartial-lpartial-mathbfl3"><span class="math inline">\(\dfrac{\partial L}{\partial \mathbf{l^3}}\)</span></h5>
-<p>This is the derivative of a scalar-valued loss function with respect to a vector. It is a <span class="math inline">\(10\)</span>-dimensional vector of partial derivatives, where each entry captures the loss changes with respect to a change in that unit of layer 3.</p>
+<p>This is the derivative of a scalar-valued loss function with respect to a vector. It is a <span class="math inline">\(10\)</span>-dimensional vector of partial derivatives, where each entry captures the loss changes with respect to a change in that node of layer 3.</p>
 <p>We can evaluate the derivative of the cross entropy loss directly:</p>
 <p><span class="math display">\[
 \dfrac{\partial L }{\partial l^3_n} = \text{softmax}(l^3)_n - \delta_{n, y}
@@ -510,8 +506,8 @@ L(\mathbf{l^3}, y) = -\log \dfrac{ \exp{ l^3_y }}{ \sum_k \exp{ l^3_k }}
 &amp;= \dfrac{\partial L}{\partial l^3_o} \dfrac{\partial l^3_o}{\partial W^3_{i,o}} \\
 &amp;= \dfrac{\partial L}{\partial l^3_o} l^2_i
 \end{align}\]</span></p>
-<p>The notation can get a little tricky to follow here. In words, to find out how the loss changes with respect to a single weight <span class="math inline">\(W^3_{i,o}\)</span> we will see how changing this weight changes layer 3, and then how changing layer 3 changes the loss. To compute this, we will take the sum over how each weight <span class="math inline">\(W^3_{i,o}\)</span> affects the unit <span class="math inline">\(n\)</span> in layer 3, <span class="math inline">\(l^3_n\)</span>, then how a change in this unit affects the loss. This weight only connects to one unit, <span class="math inline">\(o\)</span> and so the effect of changing that weight on all other units is zero.</p>
-<p>So we can take the usual scalar derivative here <span class="math inline">\(\dfrac{\partial l^3_o}{\partial W^3_{i,o}} = \dfrac{\partial \ l^2_i W^3_{i,o}}{\partial W^3_{i,o}} = l^2_i\)</span>. This makes intuitive sense, the change in <span class="math inline">\(l^3_o\)</span> when we make a small change <span class="math inline">\(\delta W^3_{i,o}\)</span> is exactly the value of the input unit, <span class="math inline">\(l^2_i\)</span>.</p>
+<p>The notation can get a little tricky to follow here. In words, to find out how the loss changes with respect to a single weight <span class="math inline">\(W^3_{i,o}\)</span> we will see how changing this weight changes layer 3, and then how changing layer 3 changes the loss. To compute this, we will take the sum over how each weight <span class="math inline">\(W^3_{i,o}\)</span> affects the node <span class="math inline">\(n\)</span> in layer 3, <span class="math inline">\(l^3_n\)</span>, then how a change in this node affects the loss. This weight only connects to one node, <span class="math inline">\(o\)</span> and so the effect of changing that weight on all other nodes is zero.</p>
+<p>So we can take the usual scalar derivative here <span class="math inline">\(\dfrac{\partial l^3_o}{\partial W^3_{i,o}} = \dfrac{\partial \ l^2_i W^3_{i,o}}{\partial W^3_{i,o}} = l^2_i\)</span>. This makes intuitive sense, the change in <span class="math inline">\(l^3_o\)</span> when we make a small change <span class="math inline">\(\delta W^3_{i,o}\)</span> is exactly the value of the input node, <span class="math inline">\(l^2_i\)</span>.</p>
 </section>
 <section id="putting-this-all-together-dfracpartial-lpartial-w3-dfracpartial-lpartial-mathbfl3-dfracpartial-mathbfl3-partial-w3" class="level5">
 <h5 class="anchored" data-anchor-id="putting-this-all-together-dfracpartial-lpartial-w3-dfracpartial-lpartial-mathbfl3-dfracpartial-mathbfl3-partial-w3">Putting this all together: <span class="math inline">\(\dfrac{\partial L}{\partial W^3} = \dfrac{\partial L}{\partial \mathbf{l^3}} \dfrac{\partial \mathbf{l^3} }{\partial W^3}\)</span></h5>
@@ -542,7 +538,7 @@ L(\mathbf{l^3}, y) = -\log \dfrac{ \exp{ l^3_y }}{ \sum_k \exp{ l^3_k }}
 &amp; [\text{sm}(l^3_{10}) - \delta_{10, y}] l^2_{512}
 \end{bmatrix}
 \]</span></p>
-<p>i.e.&nbsp;for each weight, we see the effect of changing that weight on the layer 3 unit it is connected to and multiply it with the effect of changing that layer 3 unit on the loss.</p>
+<p>i.e.&nbsp;for each weight, we see the effect of changing that weight on the layer 3 node it is connected to and multiply it with the effect of changing that layer 3 node on the loss.</p>
 <p>We can write all of this as the <a href="https://en.wikipedia.org/wiki/Outer_product">outer product</a> of two vectors (recall all vectors are row vectors here, so the transpose is to a column vector):</p>
 <p><span class="math display">\[
 \dfrac{\partial L}{\partial W^3} = (\mathbf{l^2})^T \dfrac{\partial L}{\partial \mathbf{l^3}}
@@ -577,7 +573,7 @@ L(\mathbf{l^3}, y) = -\log \dfrac{ \exp{ l^3_y }}{ \sum_k \exp{ l^3_k }}
     \sum_o \dfrac{ \partial L }{ \partial l^3_o } \dfrac{\partial l^3_o }{ \partial l^2_{512} }
 \end{bmatrix}
 \end{aligned}\]</span>
-<p>Because each unit of layer 2 is connected to every unit of layer 3, so to understand how a change in unit in layer 2 affects the loss, we sum over its effect on every unit in layer 3. While the derivatives don’t go to zero like in the <span class="math inline">\(W^3\)</span> case above, each individual derivative is simple to compute:</p>
+<p>Because each node of layer 2 is connected to every node of layer 3, so to understand how a change in node in layer 2 affects the loss, we sum over its effect on every node in layer 3. While the derivatives don’t go to zero like in the <span class="math inline">\(W^3\)</span> case above, each individual derivative is simple to compute:</p>
 <p><span class="math display">\[
 \dfrac{\partial l^3_o }{ \partial l^2_i } = \dfrac{\partial l^2_i W^3_{i, o} }{ \partial l^2_i } = W^3_{i, o}
 \]</span></p>
@@ -589,7 +585,7 @@ L(\mathbf{l^3}, y) = -\log \dfrac{ \exp{ l^3_y }}{ \sum_k \exp{ l^3_k }}
 <section id="dfracpartial-mathbfl2-partial-w2" class="level5">
 <h5 class="anchored" data-anchor-id="dfracpartial-mathbfl2-partial-w2"><span class="math inline">\(\dfrac{\partial \mathbf{l^2} }{\partial W^2}\)</span></h5>
 <p>Now, we have the multiplication of this <span class="math inline">\((1, 512)\)</span> 2-rank tensor <span class="math inline">\(\dfrac{ \partial L }{ \partial \mathbf{l^2} }\)</span> with the <span class="math inline">\((512, 512, 512)\)</span> 3-rank tensor <span class="math inline">\(\dfrac{\partial \mathbf{l^2} }{\partial W^2}\)</span>. In tensor multiplication, we need to be explicit about what dimensions we sum over.</p>
-<p>Because each <span class="math inline">\(W^2_{i, o}\)</span> is connected to a single layer 2 unit <span class="math inline">\(l^2_o\)</span>, things are the same as in the <span class="math inline">\(W^3\)</span> case and most of the derivatives go to zero. Therefore using the same logic, we have:</p>
+<p>Because each <span class="math inline">\(W^2_{i, o}\)</span> is connected to a single layer 2 node <span class="math inline">\(l^2_o\)</span>, things are the same as in the <span class="math inline">\(W^3\)</span> case and most of the derivatives go to zero. Therefore using the same logic, we have:</p>
 <p><span class="math display">\[
 \dfrac{ \partial L }{ \partial W^2 } = (\mathbf{l^1})^T \dfrac{ \partial L }{ \partial \mathbf{l^2} }
 \]</span></p>
@@ -624,7 +620,7 @@ L(\mathbf{l^3}, y) = -\log \dfrac{ \exp{ l^3_y }}{ \sum_k \exp{ l^3_k }}
 </section>
 <section id="the-code" class="level2">
 <h2 class="anchored" data-anchor-id="the-code">The Code</h2>
-<div id="9e907e85b1133c4e" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;ExecuteTime&quot;,&quot;value&quot;:{&quot;end_time&quot;:&quot;2025-12-17T01:18:17.136876Z&quot;,&quot;start_time&quot;:&quot;2025-12-17T01:18:17.126061Z&quot;}}" data-execution_count="13">
+<div id="9e907e85b1133c4e" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;ExecuteTime&quot;,&quot;value&quot;:{&quot;end_time&quot;:&quot;2025-12-17T01:18:17.136876Z&quot;,&quot;start_time&quot;:&quot;2025-12-17T01:18:17.126061Z&quot;}}">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>run <span class="op">=</span> <span class="va">False</span></span>
@@ -672,7 +668,7 @@ L(\mathbf{l^3}, y) = -\log \dfrac{ \exp{ l^3_y }}{ \sum_k \exp{ l^3_k }}
 <span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"Loss: </span><span class="sc">{</span>loss<span class="sc">}</span><span class="ss">"</span>)</span>
 <span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Compute the derivatives</span></span>
-<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a>        dloss_dl3 <span class="op">=</span> <span class="va">self</span>.softmax(l3)  <span class="co"># double check this</span></span>
+<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a>        dloss_dl3 <span class="op">=</span> <span class="va">self</span>.softmax(l3) </span>
 <span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a>        dloss_dl3[<span class="dv">0</span>][y] <span class="op">-=</span> <span class="dv">1</span></span>
 <span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a>        dloss_dW3 <span class="op">=</span> l2.T <span class="op">@</span> dloss_dl3       <span class="co"># (512, 10) = (512, 1) x (1, 10)</span></span>
@@ -718,9 +714,11 @@ L(\mathbf{l^3}, y) = -\log \dfrac{ \exp{ l^3_y }}{ \sum_k \exp{ l^3_k }}
 </section>
 <section id="a-better-model" class="level2">
 <h2 class="anchored" data-anchor-id="a-better-model">A Better Model</h2>
-<p>We will add some simple changes to improve the performance of the model. In our simple version about, we essentially had <span class="math inline">\(\mathbf{l^3} = \mathbf{x}W\)</span> where <span class="math inline">\(W\)</span> is a <span class="math inline">\((784, 10)\)</span> matrix. One way to interpret this is a matrix encoding 10 linear hyperplanes in a <span class="math inline">\(784\)</span>-dimension space that separate points according to their label.</p>
+<p>We will now extend the model to a standard neural network by including a bias term and activation function. add some simple changes to improve the performance of the model.</p>
+<p>In our simple version, we essentially had <span class="math inline">\(\mathbf{l} = \mathbf{x}W\)</span> where <span class="math inline">\(W\)</span> is a <span class="math inline">\((784, 10)\)</span> matrix. One way to interpret this is a matrix encoding <span class="math inline">\(10\)</span> hyperplanes (their normal vectors) in a <span class="math inline">\(784\)</span>-dimension space. The dot product between the image vector <span class="math inline">\(\mathbf{x}\)</span> and a column of this <span class="math inline">\(W\)</span> captures the alignment between that hyperplane’s normal vector and the image vector.</p>
 <p>A simple change we will make is to include a bias term <span class="math inline">\(\mathbf{b}\)</span>. We can interpret this as adding an offset to each hyperplane, meaning our data does not need to be centered at zero.</p>
-<p>More improtantly, we will also add an activation function around each unit. Once the activation at each unit is computed, we run it through a nonlinear function. Immediately, this means we loose the ‘linear hyperplane’ interpretation. This change now means the SEP BOUNDARY between groups do not need to be linear hyperplanes, but can be much more flexible and bendy. wNow, we will introduce an activation function which will make our network nonlinear. <strong>LINK TO CS PAGE.</strong></p>
+<p>We will make the network nonlinear by passing the output of each node through a nonlinear activation function. While each layer still applies a linear transformation, the composition of these transformations with nonlinear activations makes the overall mapping nonlinear. As a result, the network can represent complex, nonlinear decision boundaries in high-dimensional space.</p>
+<p>Another way to think about the benefit of non-linear activation function is to think of each node as an individual function, and the composition across layers as the composition of these functions. In the linear case, they are compositions if linear functions, which are still linear. For example, (omitting biases here for convenience) the output of layer 2 node 1 is: <span class="math inline">\(\sum_o \sum_i x_i W^1_{i,o} W^2_{o, 1}\)</span> which is still linear. This node is a function mapping a vector to a scalar (its linear, so a hyperplane); it’s domain is <span class="math inline">\(\mathbf{x} \in \mathcal{X}\)</span>. If we add nonlinear activations, the function this node can represent are much more flexible as they are the composition of nonlinear functions. <a href="https://www.youtube.com/watch?v=CqOfi41LfDw&amp;t=925s">This</a> is a brilliant video on this idea.</p>
 <p>Our network is now:</p>
 <p><span class="math display">\[
 \begin{aligned}
@@ -729,14 +727,14 @@ L(\mathbf{l^3}, y) = -\log \dfrac{ \exp{ l^3_y }}{ \sum_k \exp{ l^3_k }}
     l^3 &amp;= \mathbf{l^2}W^3 + \mathbf{b^3} \\
 \end{aligned}
 \]</span></p>
-<p>where <span class="math inline">\(\phi(\cdot)\)</span> is our nonlinear activation function. <span class="math inline">\(\mathbf{b^i}\)</span> is a <span class="math inline">\((1, n)\)</span> vector of biases, one for each of <span class="math inline">\(n\)</span> units layer <span class="math inline">\(i\)</span>. A note on the notation, the output of <span class="math inline">\(\mathbf{l^{n-1}}W^n+\mathbf{b^n}\)</span> in each layer is still a vector (e.g.&nbsp;<span class="math inline">\((1, 10)\)</span>) and we apply the nonlinear activation function element-wise to this vector.</p>
-<p>Note we use the sigmoid function because it has interesting derivatives, but in general ReLu is preferred in larger, modern networks due to the <a href="https://en.wikipedia.org/wiki/Vanishing_gradient_problem">vanishing gradient problem</a>. Note we don’t apply the sigmoid function to the last layer, as we feed this directly to the cross-entropy loss which is already doing a mapping with the softmax function.</p>
+<p>where <span class="math inline">\(\phi(\cdot)\)</span> is our nonlinear activation function. <span class="math inline">\(\mathbf{b^i}\)</span> is a <span class="math inline">\((1, n)\)</span> vector of biases, one for each of <span class="math inline">\(n\)</span> nodes layer <span class="math inline">\(i\)</span>. The output of <span class="math inline">\(\mathbf{l^{n-1}}W^n+\mathbf{b^n}\)</span> in each layer is still a vector (e.g.&nbsp;<span class="math inline">\((1, 10)\)</span>) and we apply the nonlinear activation function element-wise to this vector.</p>
+<p>We use the sigmoid function because it has interesting derivatives, but in general ReLu is preferred in larger, modern networks due to the <a href="https://en.wikipedia.org/wiki/Vanishing_gradient_problem">vanishing gradient problem</a>. We don’t apply the sigmoid function to the last layer, as we feed this directly to the cross-entropy loss which is already doing a similar mapping with the softmax function.</p>
 <p>Now, we will take the derivatives of the loss with respect to the weights <em>and</em> biases.</p>
 <section id="computing-the-derivatives" class="level3">
 <h3 class="anchored" data-anchor-id="computing-the-derivatives">Computing the derivatives</h3>
 <section id="derivatives-of-the-sigmoid-activation-function" class="level4">
 <h4 class="anchored" data-anchor-id="derivatives-of-the-sigmoid-activation-function">Derivatives of the sigmoid activation function</h4>
-<p>The sigmoid function maps the interval <span class="math inline">\((-\infty, \infty)\)</span> to <span class="math inline">\((0, 1)\)</span>. Some intuition.</p>
+<p>The sigmoid function maps the interval <span class="math inline">\((-\infty, \infty)\)</span> to <span class="math inline">\((0, 1)\)</span>.</p>
 <p><span class="math display">\[
 \phi(z(t)) = \dfrac{1}{1 + e^{-z(t)}}
 \]</span></p>
@@ -744,7 +742,7 @@ L(\mathbf{l^3}, y) = -\log \dfrac{ \exp{ l^3_y }}{ \sum_k \exp{ l^3_k }}
 <p><span class="math display">\[
 \dfrac{d}{dt} (1 + e^{-z(t)})^{-1} =  \dfrac{ e^{-z(t)} }{ (1 + e^{-z(t)})^2 } \dfrac{d}{dt} z(t)
 \]</span></p>
-<p>In our case, this will just include computing these extra terms of our layers next tot he derivative.</p>
+<p>So, we will need account for include these additional terms in our derivative computations.</p>
 </section>
 <section id="w3-and-mathbfb3" class="level4">
 <h4 class="anchored" data-anchor-id="w3-and-mathbfb3"><span class="math inline">\(W^3\)</span> and <span class="math inline">\(\mathbf{b^3}\)</span></h4>
@@ -752,28 +750,27 @@ L(\mathbf{l^3}, y) = -\log \dfrac{ \exp{ l^3_y }}{ \sum_k \exp{ l^3_k }}
 <p><span class="math display">\[
 \dfrac{\partial L}{\partial W^3} = (\mathbf{l^2})^T \dfrac{\partial L}{\partial \mathbf{l^3}}
 \]</span></p>
-<p>Note that the derivative of layer 3 with respect to the bias, <span class="math inline">\(l^3_o = l^2_i W^3_{i, o} + b^3_o\)</span> is <span class="math inline">\(1\)</span>. This makes intuitive sense, when we make a small <span class="math inline">\(\delta b^3_o\)</span> change, it just changes the output of layer 3 exactly by this small change <span class="math inline">\(\delta b^3_o\)</span>, because it is simply added to the output. Therefore:</p>
+<p>The derivative of layer 3 with respect to the <strong>bias</strong> is <span class="math inline">\(1\)</span>, <span class="math inline">\(\dfrac{\partial l^3_o}{\partial b^3_0} = \dfrac{\partial } {\partial b^3_o} l^2_i W^3_{i, o} + b^3_o = 1\)</span>. This makes intuitive sense, when we make a small <span class="math inline">\(\delta b^3_o\)</span> change, it just changes the output of layer 3 exactly by this small change <span class="math inline">\(\delta b^3_o\)</span>, because it is simply added to the output. Therefore:</p>
 <p><span class="math display">\[
 \dfrac{\partial L}{\partial \mathbf{b^3}} = \dfrac{\partial L}{\partial \mathbf{l^3}}
 \]</span></p>
 </section>
 <section id="w2-and-mathbfb2" class="level4">
 <h4 class="anchored" data-anchor-id="w2-and-mathbfb2"><span class="math inline">\(W^2\)</span> and <span class="math inline">\(\mathbf{b^2}\)</span></h4>
-<p>Now things get tasty. Unfortunately, the notation gets even more complex, the easiest way to see what is going on is to follow along with a pen and paper, writing out each steps and converting to matrices as you go.</p>
-<p>Recall, the same as above, a change in the loss with a change in the weights of layer 2 is:</p>
+<p>As in the simple case, the chance in the loss with a change in the weights of layer 2 is:</p>
 <p><span class="math display">\[
 \dfrac{\partial L}{\partial W^2} = \dfrac{\partial L}{\partial \mathbf{l^3}}  \dfrac{\partial \mathbf{l^3}}{\partial \mathbf{l^2}}  \dfrac{\partial \mathbf{l^2} }{\partial W^2}
 \]</span></p>
 <section id="dfrac-partial-l-partial-mathbfl2" class="level5">
 <h5 class="anchored" data-anchor-id="dfrac-partial-l-partial-mathbfl2"><span class="math inline">\(\dfrac{ \partial L }{ \partial \mathbf{l^2}}\)</span></h5>
-<p>Because layer 3 does not have an activation function (and the derivative of the new bias term goes to zero) this is identical to the simple case above:</p>
+<p>Because layer 3 does not have an activation function (and the derivative of the new bias term goes to zero) this is identical to the simple case:</p>
 <p><span class="math display">\[
 \dfrac{ \partial L }{ \partial \mathbf{l^2}} = \dfrac{ \partial L }{ \partial \mathbf{l^3}} (W^3)^T
 \]</span></p>
 </section>
 <section id="dfrac-partial-l-partial-w2" class="level5">
 <h5 class="anchored" data-anchor-id="dfrac-partial-l-partial-w2"><span class="math inline">\(\dfrac{ \partial L }{ \partial W^2 }\)</span></h5>
-<p>Now we are ready to compute the derivative of the loss with respect to the weight matrix of layer 2, and the bias vector. First starting with the weights, looking at each weight in isolation:</p>
+<p>Next, to compute the derivative of the loss with respect to the layer 2 weight matrix and the bias. First starting with the weights, again considering each weight in isolation:</p>
 <p><span class="math display">\[
 \dfrac{ \partial L }{\partial W^2_{i, o}} = \dfrac{ \partial L }{ \partial l^2_o } \dfrac{ \partial l^2_o }{ \partial W^2_{i, o}}
 \]</span></p>
@@ -781,12 +778,11 @@ L(\mathbf{l^3}, y) = -\log \dfrac{ \exp{ l^3_y }}{ \sum_k \exp{ l^3_k }}
 <p><span class="math display">\[
 \dfrac{ \partial l^2_o }{ \partial W^2_{i, o}} = \dfrac{ \partial }{ \partial W^2_{i, o}} \phi( \sum_n l^1_n W^2_{n, o} + b^2_o)
 \]</span></p>
-<p>Recalling the derivative of the term inside <span class="math inline">\(\phi\)</span> with respect to the weight <span class="math inline">\(W^2_{i,o}\)</span> is <span class="math inline">\(l^1_i\)</span> as it is <span class="math inline">\(0\)</span> when <span class="math inline">\(n \neq i\)</span>. Letting <span class="math inline">\(\hat{l^2_o} = \sum_i l^1_i W^2_{i, o} + b^2_o\)</span>:</p>
+<p>The term inside <span class="math inline">\(\phi\)</span> with respect to the weight <span class="math inline">\(W^2_{i,o}\)</span> is <span class="math inline">\(l^1_i\)</span> as it is <span class="math inline">\(0\)</span> when <span class="math inline">\(n \neq i\)</span> (because that weight does not connect to that layer 1 input node). Recalling the form of the derivative of the sigmoid function above, and letting <span class="math inline">\(\hat{l^2_o} = \sum_i l^1_i W^2_{i, o} + b^2_o\)</span>:</p>
 <p><span class="math display">\[
 \dfrac{ \partial l^2_o }{ \partial W^2_{i,o}} = \dfrac{ e^{-\hat{l^2_o}} }{ (1 + e^{-\hat{l^2_o}})^2 } \ l^1_i
 \]</span></p>
-<p>We can implement this in matrix form. <span class="math inline">\(\hat{l^2}\)</span> is a <span class="math inline">\((1, 10)\)</span> vector and so the element-wise multiplication is what we need here (officilally called the <a href="https://en.wikipedia.org/wiki/Hadamard_product_(matrices)">Hadamard product</a> with notation <span class="math inline">\(\circ\)</span>.</p>
-<p>So in fact, the derivative looks very similar to before we had the activation function, except now we have this extra term related to its derivative:</p>
+<p>We can implement this in matrix form. <span class="math inline">\(\hat{l^2}\)</span> is a <span class="math inline">\((1, 10)\)</span> vector and so the element-wise multiplication is what we need here (officilally called the <a href="https://en.wikipedia.org/wiki/Hadamard_product_(matrices)">Hadamard product</a> with notation <span class="math inline">\(\circ\)</span>). Bringing this all together:</p>
 <p><span class="math display">\[
 \begin{aligned}
     \dfrac{ \partial L }{\partial W^2} = (\mathbf{l^1})^T   \bigg(  \dfrac{ e^{-\mathbf{\hat{l^2}}} }{ (1 + e^{-\mathbf{\hat{l^2}}})^2 }   \circ \dfrac{ \partial L }{ \partial \mathbf{l^2} } \bigg)
@@ -795,7 +791,8 @@ L(\mathbf{l^3}, y) = -\log \dfrac{ \exp{ l^3_y }}{ \sum_k \exp{ l^3_k }}
 <p><span class="math display">\[
 (512, 512) = (512, 1) \times (1, 512) \circ (1, 512)
 \]</span></p>
-<p>and if we take that derivative with respect to <span class="math inline">\(b_o\)</span> then the term goes to <span class="math inline">\(1\)</span> and dissapears:</p>
+<p>So in fact, the derivative looks very similar to before we had the activation function, except now we have these extra terms from the chain rule.</p>
+<p>The bias calculation is simple, if we take the above derivative with respect to <span class="math inline">\(b_o\)</span> then the inside derivative goes to <span class="math inline">\(1\)</span>:</p>
 <p><span class="math display">\[
     \dfrac{ \partial L }{\partial \mathbf{b^2}} =  \dfrac{ e^{-\mathbf{\hat{l^2}}} }{ (1 + e^{-\mathbf{\hat{l^2}}})^2 } \circ \dfrac{ \partial L }{ \partial \mathbf{l^2} }
 \]</span></p>
@@ -811,18 +808,18 @@ L(\mathbf{l^3}, y) = -\log \dfrac{ \exp{ l^3_y }}{ \sum_k \exp{ l^3_k }}
 </section>
 <section id="dfracpartial-l-partial-mathbfl1" class="level4">
 <h4 class="anchored" data-anchor-id="dfracpartial-l-partial-mathbfl1"><span class="math inline">\(\dfrac{\partial L}{ \partial \mathbf{l^1} }\)</span></h4>
-<p>This will be a <span class="math inline">\((1, 512)\)</span> vector where each element is how the loss changes with a small change in the corresponding unit of layer 1. For each unit in layer 1, we can compute this with the total derivative rule, by looking at the effect of each a small change in a layer 1 unit (input, <span class="math inline">\(i\)</span>) on every unit in layer 2 (output, <span class="math inline">\(o\)</span>) that it is connected to:</p>
+<p>Again, this will be a <span class="math inline">\((1, 512)\)</span> vector where each element is how the loss changes with a small change in the corresponding node of layer 1. Similar to the simple case, we can compute each element individually using the total derivative rule:</p>
 <p><span class="math display">\[
 \begin{aligned}
 \dfrac{\partial L}{\partial l^1_i }  &amp;= \sum_o \dfrac{\partial L}{\partial l^2_o } \dfrac{\partial l^2_o}{\partial l^1_i }
 \end{aligned}
 \]</span></p>
-<p>and note the output of a single layer 2 unit is:</p>
+<p>and note the output of a single layer 2 node is:</p>
 <p><span class="math display">\[
-l^2_o = \phi \left( \sum_i l^1_i W^2_{i, o} + b^2_o \right)
+l^2_o = \phi \left( \sum_n l^1_n W^2_{n, o} + b^2_o \right)
 \]</span></p>
-<p>For the derivative of the term inside the activation function, this is exactly the same as the simple case. We take the derivative of <span class="math inline">\(\sum_i l^1_i W^2_{i, o} + b^2_o\)</span> with respect to a specific input unit <span class="math inline">\(l^1_\hat{i}\)</span> then all terms are zero except for the case where <span class="math inline">\(i = \hat{i}\)</span>. Therefore, the derivative with respect to <span class="math inline">\(l^1_\hat{i}\)</span> is <span class="math inline">\(W^2_{\hat{i}, o}\)</span>.</p>
-<p>Here, we will introduce the notation <span class="math inline">\(\mathbf{\hat{l^2}} = \mathbf{l^1}W^2 + \mathbf{b^2}\)</span>, i.e.&nbsp;<span class="math inline">\(\mathbf{\hat{l^2}}\)</span> is the output of layer 2 before we put it through the activation function.</p>
+<p>For the derivative of the term inside the activation function, this is exactly the same as the simple case. We take the derivative of <span class="math inline">\(\sum_n l^1_n W^2_{n, o} + b^2_o\)</span> with respect to a specific input node <span class="math inline">\(l^1_i\)</span> then all terms are zero except for the case where <span class="math inline">\(i = n\)</span>. Therefore, the derivative with respect to <span class="math inline">\(l^1_i\)</span> is <span class="math inline">\(W^2_{i,o}\)</span>.</p>
+<p>Again, we will introduce the notation <span class="math inline">\(\mathbf{\hat{l^2}} = \mathbf{l^1}W^2 + \mathbf{b^2}\)</span>, i.e.&nbsp;<span class="math inline">\(\mathbf{\hat{l^2}}\)</span> is the output of layer 2 before we put it through the activation function.</p>
 <p>Putting this together with the derivative of the activation function, as above:</p>
 <p><span class="math display">\[
 \begin{aligned}
@@ -831,12 +828,10 @@ l^2_o = \phi \left( \sum_i l^1_i W^2_{i, o} + b^2_o \right)
 &amp;= \sum_o \dfrac{\partial L}{\partial l^2_o } \dfrac{ e^{-\hat{l^2_o}} }{ (1 + e^{-\hat{l^2_o}})^2 } W^2_{i, o}
 \end{aligned}
 \]</span></p>
-<p>Intuitively, this makes sense. XXX.</p>
-<p>So we can implement this in vector form as:</p>
+<p>So we can represent this in matrix form as:</p>
 <p><span class="math display">\[
 \dfrac{ \partial L }{ \partial \mathbf{l^1} } = \bigg( \dfrac{ \partial L }{ \partial \mathbf{l^2} }  \circ  \dfrac{ e^{-\mathbf{\hat{l^2}}} }{ (1 + e^{-\mathbf{\hat{l^2}}})^2 } \bigg) (W^2)^T
 \]</span></p>
-<p>The easiest way to see this vector form implementation is to write out all the terms with pen and paper and follow them through. MAKE CLEAR THE EPONENTIAL TERM IS A VECTOR AND WE APPLY THE EXPON INDIVIDUALLY.</p>
 </section>
 <section id="so-putting-it-all-together-for-w1-and-mathbfb1" class="level4">
 <h4 class="anchored" data-anchor-id="so-putting-it-all-together-for-w1-and-mathbfb1">So putting it all together for <span class="math inline">\(W^1\)</span> and <span class="math inline">\(\mathbf{b^1}\)</span></h4>
@@ -870,10 +865,8 @@ l^2_o = \phi \left( \sum_i l^1_i W^2_{i, o} + b^2_o \right)
 <p><span class="math display">\[
 \dfrac{ \partial L}{ \partial \mathbf{b^1}} = \dfrac{ e^{-\hat{\mathbf{l^1}} } }{ (1 + e^{-\hat{\mathbf{l^1}} })^2 } \circ \mathbf{g_2}
 \]</span></p>
-<p>TODO: add total derivative appendix TODO: add some pictures of neurons TODO: check all writing</p>
-<p>In sum, thank god for autodiff!</p>
-<p>TODO: mention batching, highlight accuracys</p>
-<div id="a1fdbd87" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;ExecuteTime&quot;,&quot;value&quot;:{&quot;end_time&quot;:&quot;2025-12-17T01:18:17.202698Z&quot;,&quot;start_time&quot;:&quot;2025-12-17T01:18:17.191179Z&quot;}}" data-execution_count="14">
+<p>This network is implemented below, and we see the accuracy in this case has increased by 10%, from 73% to 83%.</p>
+<div id="a1fdbd87" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;ExecuteTime&quot;,&quot;value&quot;:{&quot;end_time&quot;:&quot;2025-12-17T01:18:17.202698Z&quot;,&quot;start_time&quot;:&quot;2025-12-17T01:18:17.191179Z&quot;}}">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>run <span class="op">=</span> <span class="va">False</span></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -935,7 +928,7 @@ l^2_o = \phi \left( \sum_i l^1_i W^2_{i, o} + b^2_o \right)
 <span id="cb12-59"><a href="#cb12-59" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"Loss: </span><span class="sc">{</span>loss<span class="sc">}</span><span class="ss">"</span>)</span>
 <span id="cb12-60"><a href="#cb12-60" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-61"><a href="#cb12-61" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Compute the derivatives</span></span>
-<span id="cb12-62"><a href="#cb12-62" aria-hidden="true" tabindex="-1"></a>        dloss_dl3 <span class="op">=</span> <span class="va">self</span>.softmax(l3)  <span class="co"># double check this</span></span>
+<span id="cb12-62"><a href="#cb12-62" aria-hidden="true" tabindex="-1"></a>        dloss_dl3 <span class="op">=</span> <span class="va">self</span>.softmax(l3)</span>
 <span id="cb12-63"><a href="#cb12-63" aria-hidden="true" tabindex="-1"></a>        dloss_dl3[<span class="dv">0</span>][y] <span class="op">-=</span> <span class="dv">1</span></span>
 <span id="cb12-64"><a href="#cb12-64" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-65"><a href="#cb12-65" aria-hidden="true" tabindex="-1"></a>        dloss_dW3 <span class="op">=</span> l2.T <span class="op">@</span> dloss_dl3</span>
@@ -1013,7 +1006,7 @@ w = f(x(t), y(t))
 <p><span class="math display">\[
 \dfrac{dw}{dt} = \dfrac{\partial w}{ \partial x(t)} \dfrac{\partial x(t)}{ \partial t} + \dfrac{\partial w}{ \partial y(t)} \dfrac{\partial y(t)}{ \partial t}
 \]</span></p>
-<p>Note this is exactly analogous to our set up with the layers and weights. A small change in a unit in layer 2 will effect the loss through every unit in layer 3. Let’s look at unit 1 from layer 2 (<span class="math inline">\(l^2_1\)</span>) as an example. Here layer 3 units are a function taking <span class="math inline">\(l^2_1\)</span>, which is like <span class="math inline">\(t\)</span> in the above example, as an input:</p>
+<p>Note this is exactly analogous to our set up with the layers and weights. A small change in a node in layer 2 will effect the loss through every node in layer 3. Let’s look at node 1 from layer 2 (<span class="math inline">\(l^2_1\)</span>) as an example. Here layer 3 nodes are a function taking <span class="math inline">\(l^2_1\)</span>, which is like <span class="math inline">\(t\)</span> in the above example, as an input:</p>
 <p><span class="math display">\[
 \text{loss} = L( \ l^3_1(l^2_1), \ l^3_2(l^2_1), \ ..., \ l^3_{10}(l^2_1) \ )
 \]</span></p>
