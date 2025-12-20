@@ -14,6 +14,21 @@
 :link-type: doc
 :::
 
+:::{grid-item-card} Complex numbers introduction
+:link: complex-1
+:link-type: doc
+:::
+
+:::{grid-item-card} Complex numbers extended
+:link: complex-2
+:link-type: doc
+:::
+
+:::{grid-item-card} Argand Diagrams and Polar Coordinates
+:link: arg-diagrams-polar
+:link-type: doc
+:::
+
 Loose explorations, visualizations, and experimental notes.
 :::
 

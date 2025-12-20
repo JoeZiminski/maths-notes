@@ -2,7 +2,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = "joes-maths-notes"
+project = "maths-notes"
 copyright = "2025, joe ziminski"
 author = "joe ziminski"
 
@@ -31,7 +31,7 @@ source_suffix = {
 
 html_theme = "pydata_sphinx_theme"
 
-html_title = "Joe’s Maths Notes"
+html_title = "Maths Notes"
 
 html_static_path = ["_static"]
 

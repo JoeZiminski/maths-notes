@@ -4,19 +4,26 @@ Datashuttle PRs
 
 
 - macOS keyboard shortcuts - https://github.com/neuroinformatics-unit/datashuttle/issues/617
-: this is not possible, and needs to be a documentation issue
+: this is not possible, and needs to 
+
+- - #618, deselect 'All' + https://github.com/neuroinformatics-unit/datashuttle/issues/537
+- 'Go to project screen' button is at the far-right edge https://github.com/neuroinformatics-unit/datashuttle/issues/609
+
+- refactor 'check and format names' https://github.com/neuroinformatics-unit/datashuttle/issues/598
+
+- do not allow blank sub- or ses-   - https://github.com/neuroinformatics-unit/datashuttle/issues/619
+
+
+- add GIF to the website - https://github.com/neuroinformatics-unit/datashuttle/issues/576
+- [WAIT FOR SSH] review all call_rclone calls - https://github.com/neuroinformatics-unit/datashuttle/issues/599  
+- validate broad vs narrow datatypes - https://github.com/neuroinformatics-unit/datashuttle/issues/466
+
+
+- Try to improve test speed + extend ssh, aws and gdrive tests		 - https://github.com/neuroinformatics-unit/datashuttle/issues/577 + https://github.com/neuroinformatics-unit/datashuttle/issues/577
 
 - shell=False               		 - https://github.com/neuroinformatics-unit/datashuttle/issues/639
 - reordering of get started section
-- add GIF to the website - https://github.com/neuroinformatics-unit/datashuttle/issues/576
-- review all call_rclone calls - https://github.com/neuroinformatics-unit/datashuttle/issues/599
-- 'Go to project screen' button is at the far-right edge https://github.com/neuroinformatics-unit/datashuttle/issues/609
-- #618, deselect 'All'              - 618 + https://github.com/neuroinformatics-unit/datashuttle/issues/537
 
-- Try to improve test speed + extend ssh, aws and gdrive tests		 - https://github.com/neuroinformatics-unit/datashuttle/issues/577 + https://github.com/neuroinformatics-unit/datashuttle/issues/577
-- refactor 'check and format names' https://github.com/neuroinformatics-unit/datashuttle/issues/598
-- validate broad vs narrow datatypes - https://github.com/neuroinformatics-unit/datashuttle/issues/466
-- do not allow blank sub- or ses-   - https://github.com/neuroinformatics-unit/datashuttle/issues/619
 
 
 4) Refine transfer arguments + implement API Review. For now, write up API review
